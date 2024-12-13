@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    // TODO: corregir
+
 
 
     // Buscar usuario por login (caso típico para autenticación)

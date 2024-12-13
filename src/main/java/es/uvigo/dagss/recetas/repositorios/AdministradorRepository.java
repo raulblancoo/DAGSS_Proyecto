@@ -7,6 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface AdministradorRepository extends JpaRepository<Administrador, Long> {
+    List<Administrador> findByActivo(boolean activo);
+    boolean existsByEmail(String email);
+
+
+
     // Buscar administradores por nombre o email
     @Query("SELECT a FROM Administrador a WHERE " +
             "LOWER(a.nombre) LIKE LOWER(CONCAT('%', :term, '%')) " +
@@ -14,6 +19,9 @@ public interface AdministradorRepository extends JpaRepository<Administrador, Lo
     List<Administrador> buscarPorNombreOEmail(String term);
 
     List<Administrador> findByActivoTrue();
+
+    List<Administrador> findByNombreContainingIgnoreCaseOrLoginContainingIgnoreCaseOrEmailContainingIgnoreCase(String nombre, String login, String email);
+
 
     // Buscar por login
 //    @Query("SELECT a FROM Administrador a WHERE LOWER(a.usuario.login) = LOWER(:login)")
