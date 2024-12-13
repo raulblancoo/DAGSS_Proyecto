@@ -32,7 +32,7 @@ public class Medico extends Usuario {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "centro_id", nullable = false)
-    private CentroDeSalud centroDeSalud;
+    private CentroSalud centroSalud;
 
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Paciente> pacientes;
@@ -44,7 +44,7 @@ public class Medico extends Usuario {
         super(TipoUsuario.MEDICO);
     }
 
-    public Medico(String nombre, String apellidos, String dni, String numeroColegiado, String telefono, String email, CentroDeSalud centroDeSalud) {
+    public Medico(String nombre, String apellidos, String dni, String numeroColegiado, String telefono, String email, CentroSalud centroSalud) {
         super(TipoUsuario.MEDICO);
         this.nombre = nombre;
         this.apellidos = apellidos;
@@ -52,6 +52,6 @@ public class Medico extends Usuario {
         this.numeroColegiado = numeroColegiado;
         this.telefono = telefono;
         this.email = email;
-        this.centroDeSalud = centroDeSalud;
+        this.centroSalud = centroSalud;
     }
 }

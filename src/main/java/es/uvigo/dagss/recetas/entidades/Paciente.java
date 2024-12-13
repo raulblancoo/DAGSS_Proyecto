@@ -40,7 +40,7 @@ public class Paciente extends Usuario {
 
     @ManyToOne
     @JoinColumn(name = "CENTRO_ID", nullable = false)
-    private CentroDeSalud centroDeSalud;
+    private CentroSalud centroSalud;
 
     @ManyToOne
     @JoinColumn(name = "MEDICO_ID", nullable = false)
@@ -55,7 +55,7 @@ public class Paciente extends Usuario {
     public Paciente(String login, String password, String nombre, String apellidos, String dni,
                     String tarjetaSanitaria, String numeroSeguridadSocial, String direccion,
                     String telefono, String email, Date fechaNacimiento,
-                    CentroDeSalud centroDeSalud, Medico medico) {
+                    CentroSalud centroSalud, Medico medico) {
         super(TipoUsuario.PACIENTE, login, password);
         this.nombre = nombre;
         this.apellidos = apellidos;
@@ -66,7 +66,7 @@ public class Paciente extends Usuario {
         this.telefono = telefono;
         this.email = email;
         this.fechaNacimiento = fechaNacimiento;
-        this.centroDeSalud = centroDeSalud;
+        this.centroSalud = centroSalud;
         this.medico = medico;
     }
 }

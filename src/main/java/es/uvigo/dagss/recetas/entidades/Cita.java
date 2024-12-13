@@ -27,7 +27,7 @@ public class Cita {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "centro_id")
-    private CentroDeSalud centroDeSalud;
+    private CentroSalud centroSalud;
 
     @Column(nullable = false)
     private LocalDateTime fechaHoraInicio;

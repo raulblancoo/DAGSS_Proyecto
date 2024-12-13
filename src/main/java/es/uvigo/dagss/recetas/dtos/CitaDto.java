@@ -1,6 +1,6 @@
 package es.uvigo.dagss.recetas.dtos;
 
-import es.uvigo.dagss.recetas.entidades.CentroDeSalud;
+import es.uvigo.dagss.recetas.entidades.CentroSalud;
 import es.uvigo.dagss.recetas.entidades.Cita;
 import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.entidades.Paciente;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class CitaDto {
     private Paciente paciente;
     private Medico medico;
-    private CentroDeSalud centroDeSalud;
+    private CentroSalud centroSalud;
     private LocalDateTime fechaHoraInicio;
     private Integer duracionMinutos;
     private Cita.EstadoCita estado;
