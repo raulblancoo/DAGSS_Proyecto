@@ -39,6 +39,6 @@ public class Receta {
     private EstadoReceta estado;
 
     public enum EstadoReceta {
-        PENDIENTE, DISPENSADA, CANCELADA
+        PLANIFICADA, SERVIDA, ANULADA
     }
 }
