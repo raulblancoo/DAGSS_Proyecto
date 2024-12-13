@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface PacienteRepository extends JpaRepository<Paciente, Long> {
+    Paciente findByTarjetaSanitaria(String tarjetaSanitaria);
 
     // Filtrar por nombre, localidad o médico asignado
     List<Paciente> findByNombreContainingIgnoreCaseOrDireccionContainingIgnoreCase(String nombre, String direccion);
