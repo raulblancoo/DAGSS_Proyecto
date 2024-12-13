@@ -20,6 +20,7 @@ public class CentroSaludController {
         return centroSaludService.listarCentrosSalud();
     }
 
+    // TODO: separar en métodos separados (nombre y localidad) preguntar
     @GetMapping("/buscar")
     public List<CentroSalud> buscarCentros(@RequestParam String criterio) {
         return centroSaludService.buscarCentrosPorCriterio(criterio);

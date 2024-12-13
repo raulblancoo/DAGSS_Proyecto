@@ -1,7 +1,5 @@
 package es.uvigo.dagss.recetas.controladores;
 
-
-import es.uvigo.dagss.recetas.dtos.AdministradorDto;
 import es.uvigo.dagss.recetas.entidades.Administrador;
 import es.uvigo.dagss.recetas.servicios.AdministradorService;
 import org.springframework.web.bind.annotation.*;
