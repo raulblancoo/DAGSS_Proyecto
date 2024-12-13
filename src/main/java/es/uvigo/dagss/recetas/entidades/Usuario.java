@@ -18,8 +18,12 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.TableGenerator;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)  // Una tabla propia para cada subclase
 @DiscriminatorColumn(name = "TIPO_USUARIO",
                      discriminatorType = DiscriminatorType.STRING,
@@ -63,63 +67,6 @@ public abstract class Usuario implements Serializable {
         this.tipo = tipo;
         this.login = login;
         this.password = password;
-    }
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Date getFechaAlta() {
-		return fechaAlta;
-	}
-
-	public void setFechaAlta(Date fechaAlta) {
-		this.fechaAlta = fechaAlta;
-	}
-
-	public Date getUltimoAcceso() {
-		return ultimoAcceso;
-	}
-
-	public void setUltimoAcceso(Date ultimoAcceso) {
-		this.ultimoAcceso = ultimoAcceso;
-	}
-
-
-	public TipoUsuario getTipo() {
-		return tipo;
-	}
-
-	public void setTipo(TipoUsuario tipo) {
-		this.tipo = tipo;
-	}
-
-	public String getLogin() {
-		return login;
-	}
-
-	public void setLogin(String login) {
-		this.login = login;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
     }
 
     public void activar() {
