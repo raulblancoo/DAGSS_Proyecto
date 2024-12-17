@@ -17,4 +17,10 @@ public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> 
     List<Medicamento> buscarPorCriterio(String term);
 
     List<Medicamento> findByActivoTrue();
+
+    List<Medicamento> findByNombreComercialContaining(String nombreComercial);
+    List<Medicamento> findByFabricanteContaining(String fabricante);
+    List<Medicamento> findByFamiliaContaining(String familia);
+    List<Medicamento> findByPrincipioActivoContaining(String principioActivo);
+
 }
