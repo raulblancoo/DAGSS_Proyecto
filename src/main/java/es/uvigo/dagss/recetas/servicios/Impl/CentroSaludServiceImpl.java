@@ -24,6 +24,16 @@ public class CentroSaludServiceImpl implements CentroSaludService {
         return centroSaludRepository.buscarPorNombreOLocalidad(criterio);
     }
 
+    @Override
+    public List<CentroSalud> buscarCentrosPorLocalidad(String localidad) {
+        return centroSaludRepository.findByLocalidadContaining(localidad);
+    }
+
+    @Override
+    public List<CentroSalud> buscarCentrosPorNombre(String nombre) {
+        return centroSaludRepository.findByNombreContaining(nombre);
+    }
+
     public CentroSalud crearCentro(CentroSalud centroSalud) {
         return centroSaludRepository.save(centroSalud);
     }

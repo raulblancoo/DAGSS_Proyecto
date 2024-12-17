@@ -12,4 +12,8 @@ public interface CentroSaludRepository extends JpaRepository<CentroSalud, Long> 
             "LOWER(c.nombre) LIKE LOWER(CONCAT('%', :criterio, '%')) OR " +
             "LOWER(c.localidad) LIKE LOWER(CONCAT('%', :criterio, '%'))")
     List<CentroSalud> buscarPorNombreOLocalidad(String criterio);
+
+    // TODO: revisar
+    List<CentroSalud> findByLocalidadContaining(String localidad);
+    List<CentroSalud> findByNombreContaining(String nombre);
 }

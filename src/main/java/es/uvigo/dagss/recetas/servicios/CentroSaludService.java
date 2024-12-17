@@ -7,9 +7,12 @@ import java.util.List;
 
 @Service
 public interface CentroSaludService {
-    public List<CentroSalud> listarCentrosSalud();
-    public List<CentroSalud> buscarCentrosPorCriterio(String criterio);
-    public CentroSalud crearCentro(CentroSalud centroSalud);
-    public CentroSalud editarCentro(Long id, CentroSalud datos);
-    public void desactivarCentro(Long id);
+    List<CentroSalud> listarCentrosSalud();
+    List<CentroSalud> buscarCentrosPorCriterio(String criterio);
+    List<CentroSalud> buscarCentrosPorLocalidad(String localidad);
+    List<CentroSalud> buscarCentrosPorNombre(String nombre);
+    CentroSalud crearCentro(CentroSalud centroSalud);
+    CentroSalud editarCentro(Long id, CentroSalud datos);
+    void desactivarCentro(Long id);
+
 }

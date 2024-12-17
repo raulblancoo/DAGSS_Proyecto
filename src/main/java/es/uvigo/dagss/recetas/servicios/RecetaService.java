@@ -8,6 +8,6 @@ import java.util.List;
 
 @Service
 public interface RecetaService {
-    List<RecetaDto>  buscarRecetasActivasPorTarjetaSanitaria(String tarjetaSanitaria);
+    List<RecetaDto> buscarRecetasActivasPorTarjetaSanitaria(String tarjetaSanitaria);
     Receta anotarRecetaServida(Long recetaId, Long farmaciaId);
 }
