@@ -16,4 +16,18 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
 
     List<Medico> findByCentroSalud(CentroSalud centroSalud);
     List<Medico> findByActivoTrue();
+
+
+    boolean existsByEmail(String email);
+
+
+    // TODO: comprobar si los médicos tienen que tener localidad
+//    List<Medico> findByLocalidadContaining(String localidad);
+    List<Medico> findByNombreLike(String nombre);
+    // TODO: comprobar si es string o id
+//    List<Medico> findByCentroSalud(String centroSalud);
+
+    List<Medico> findByNombreLikeOrApellidosLike(String nombre, String apellidos);
+
+
 }
