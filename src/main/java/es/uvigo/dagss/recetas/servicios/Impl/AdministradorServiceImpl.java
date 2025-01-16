@@ -41,6 +41,7 @@ public class AdministradorServiceImpl implements AdministradorService {
         return administradorRepository.save(administrador);
     }
 
+    @Transactional
     @Override
     public Administrador editarAdministrador(Long id, String nombre, String email, boolean activo) {
         Administrador administrador = administradorRepository.findById(id)
@@ -51,6 +52,7 @@ public class AdministradorServiceImpl implements AdministradorService {
         return administradorRepository.save(administrador);
     }
 
+    // TODO: que devuelva un boolean
     @Override
     public void desactivarAdministrador(Long id) {
         Administrador administrador = administradorRepository.findById(id)

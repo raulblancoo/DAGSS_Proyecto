@@ -3,7 +3,6 @@ package es.uvigo.dagss.recetas.repositorios;
 import es.uvigo.dagss.recetas.entidades.CentroSalud;
 import es.uvigo.dagss.recetas.entidades.Medico;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -21,9 +20,10 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
     boolean existsByEmail(String email);
 
 
-    // TODO: comprobar si los médicos tienen que tener localidad
-//    List<Medico> findByLocalidadContaining(String localidad);
+    List<Medico> findByCentroSalud_LocalidadLike(String localidad);
     List<Medico> findByNombreLike(String nombre);
+    List<Medico> findByCentroSalud_Id(Long id);
+
     // TODO: comprobar si es string o id
 //    List<Medico> findByCentroSalud(String centroSalud);
 

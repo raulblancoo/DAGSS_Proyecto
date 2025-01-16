@@ -1,16 +1,13 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
-import es.uvigo.dagss.recetas.entidades.Administrador;
-import es.uvigo.dagss.recetas.entidades.CentroSalud;
 import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.repositorios.MedicoRepository;
 import es.uvigo.dagss.recetas.servicios.MedicoService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MedicoServiceImpl implements MedicoService {
@@ -28,8 +25,7 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Override
     public List<Medico> buscarMedicosPorLocalidad(String localidad) {
-        // TODO
-        return List.of();
+        return medicoRepository.findByCentroSalud_LocalidadLike(localidad);
     }
 
     @Override
@@ -38,11 +34,11 @@ public class MedicoServiceImpl implements MedicoService {
     }
 
     @Override
-    public List<Medico> buscarMedicosPorCentroSalud(String nombreCentroSalud) {
-//        return medicoRepository.findByCentroSalud(nombreCentroSalud);
-        return List.of();
+    public List<Medico> buscarMedicosPorCentroSalud(Long centroSaludId) {
+        return medicoRepository.findByCentroSalud_Id(centroSaludId);
     }
 
+    @Transactional
     @Override
     public Medico crearMedico(Medico medico) {
         if(medicoRepository.existsByEmail(medico.getEmail())) {
@@ -58,13 +54,35 @@ public class MedicoServiceImpl implements MedicoService {
         return medicoRepository.save(newMedico);
     }
 
-
+    // TODO: corregir, no funciona
+    @Transactional
     @Override
-    public Medico editarMedico(Long id, Medico medicamento) {
-        // TODO
-        return null;
+    public Medico editarMedico(Long id, Medico datosMedico) {
+        Optional<Medico> medico = medicoRepository.findById(id);
+
+        if(medico.isPresent()) {
+            Medico medicoEdit = medico.get();
+            medicoEdit.setNombre(datosMedico.getNombre());
+            medicoEdit.setApellidos(datosMedico.getApellidos());
+            medicoEdit.setDni(datosMedico.getDni());
+            medicoEdit.setNumeroColegiado(datosMedico.getNumeroColegiado());
+            medicoEdit.setTelefono(datosMedico.getTelefono());
+            medicoEdit.setEmail(datosMedico.getEmail());
+            medicoEdit.setCentroSalud(datosMedico.getCentroSalud());
+            medicoEdit.setPacientes(datosMedico.getPacientes());
+            medicoEdit.setRecetas(datosMedico.getRecetas());
+            medicoEdit.setCitas(datosMedico.getCitas());
+            medicoEdit.setActivo(datosMedico.getActivo());
+            medicoEdit.setLogin(datosMedico.getLogin());
+            medicoEdit.setPassword(datosMedico.getPassword());
+
+            return medicoRepository.save(medicoEdit);
+        } else {
+            throw new IllegalArgumentException("El médico no existe");
+        }
     }
 
+    @Transactional
     @Override
     public void eliminarMedico(Long id) {
         Medico medicoExistente = medicoRepository.findById(id).
