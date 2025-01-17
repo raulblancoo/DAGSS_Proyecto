@@ -12,6 +12,7 @@ public interface MedicoService {
     List<Medico> buscarMedicosPorLocalidad(String localidad);
     List<Medico> buscarMedicosPorNombre(String nombre);
     List<Medico> buscarMedicosPorCentroSalud(Long centroSaludId);
+    List<Medico> buscarMedicosConFiltros(String nombre, String localidad, Long centroSaludId);
 
     Medico crearMedico(Medico medico);
     Medico editarMedico(Long id, Medico medicamento);

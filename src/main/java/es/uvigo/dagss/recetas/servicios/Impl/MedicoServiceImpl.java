@@ -1,9 +1,12 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.entidades.Medico;
+import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
+import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.MedicoRepository;
 import es.uvigo.dagss.recetas.servicios.MedicoService;
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,12 +41,30 @@ public class MedicoServiceImpl implements MedicoService {
         return medicoRepository.findByCentroSalud_Id(centroSaludId);
     }
 
+    @Override
+    public List<Medico> buscarMedicosConFiltros(String nombre, String localidad, Long centroSaludId) {
+        if(nombre == null && localidad == null && centroSaludId == null) {
+            return medicoRepository.findAll();
+        } else if(nombre != null && localidad == null && centroSaludId == null) {
+            return medicoRepository.findByNombreLike(nombre);
+        } else if(nombre == null && localidad != null && centroSaludId == null) {
+            return medicoRepository.findByCentroSalud_LocalidadLike(localidad);
+        } else if(nombre == null && localidad == null && centroSaludId != null) {
+            return medicoRepository.findByCentroSalud_Id(centroSaludId);
+        } else {
+            throw new WrongParameterException("Solo se puede proporcionar un parámetro de filtro a la vez.");
+        }
+    }
+
     @Transactional
     @Override
     public Medico crearMedico(Medico medico) {
-        if(medicoRepository.existsByEmail(medico.getEmail())) {
-            throw new IllegalArgumentException("El email ya está en uso.");
+
+        if(medicoRepository.existsByDniOrNumeroColegiado(medico.getDni(), medico.getNumeroColegiado())) {
+            throw new ResourceAlreadyExistsException("Ya existe un médico con los datos proporcionados.");
         }
+
+        // TODO: validacion de que centro de salud es válido???'
 
         Medico newMedico = new Medico(
                 medico.getLogin(), medico.getNumeroColegiado(),

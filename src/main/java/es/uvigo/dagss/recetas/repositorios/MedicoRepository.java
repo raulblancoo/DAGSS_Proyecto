@@ -18,16 +18,13 @@ public interface MedicoRepository extends JpaRepository<Medico, Long> {
 
 
     boolean existsByEmail(String email);
-
+    boolean existsByDniOrNumeroColegiado(String dni, String numeroColegiado);
 
     List<Medico> findByCentroSalud_LocalidadLike(String localidad);
     List<Medico> findByNombreLike(String nombre);
     List<Medico> findByCentroSalud_Id(Long id);
 
-    // TODO: comprobar si es string o id
-//    List<Medico> findByCentroSalud(String centroSalud);
+
 
     List<Medico> findByNombreLikeOrApellidosLike(String nombre, String apellidos);
-
-
 }
