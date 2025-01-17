@@ -2,6 +2,7 @@ package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.entidades.Farmacia;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
+import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.FarmaciaRepository;
 import es.uvigo.dagss.recetas.servicios.FarmaciaService;
@@ -54,8 +55,12 @@ public class FarmaciaServiceImpl implements FarmaciaService {
         return null;
     }
 
+    @Transactional
     @Override
     public void eliminarFarmacia(Long id) {
-
+        Farmacia farmaciaExistente = farmaciaRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("No existe la farmacia con id:" + id));
+        farmaciaExistente.desactivar();
+        farmaciaRepository.save(farmaciaExistente);
     }
 }

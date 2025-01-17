@@ -14,8 +14,6 @@ public interface FarmaciaMapper {
     @Mapping(source = "direccion.provincia", target = "provincia")
     @Mapping(source = "activo", target = "activo") // Asumiendo que Farmacia tiene el campo 'activo'
     FarmaciaDto toDto(Farmacia farmacia);
-
-//    FarmaciaDto toDto(Farmacia farmacia);
     Farmacia toEntity(FarmaciaDto farmaciaDto);
     List<FarmaciaDto> toListDto(List<Farmacia> farmacias);
 }
