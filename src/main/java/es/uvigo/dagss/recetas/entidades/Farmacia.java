@@ -1,10 +1,8 @@
 package es.uvigo.dagss.recetas.entidades;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -30,8 +28,8 @@ public class Farmacia extends Usuario {
     @Column(nullable = false, unique = true, length = 20)
     private String numeroColegiado;
 
-    @Column(nullable = false)
-    private String direccion;
+    @Embedded
+    private Direccion direccion;
 
     @Column(length = 20)
     private String telefono;
@@ -46,7 +44,8 @@ public class Farmacia extends Usuario {
         super(TipoUsuario.FARMACIA);
     }
 
-    public Farmacia(String nombreEstablecimiento, String nombreFarmaceutico, String apellidosFarmaceutico, String dni, String numeroColegiado, String direccion, String telefono, String email) {
+    public Farmacia(String nombreEstablecimiento, String nombreFarmaceutico, String apellidosFarmaceutico, String dni, String numeroColegiado,
+                    Direccion direccion,String telefono, String email) {
         super(TipoUsuario.FARMACIA);
         this.nombreEstablecimiento = nombreEstablecimiento;
         this.nombreFarmaceutico = nombreFarmaceutico;
