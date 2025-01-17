@@ -13,17 +13,8 @@ public class CentroSalud {
     @Column(nullable = false, length = 100)
     private String nombre;
 
-    @Column(nullable = false, length = 150)
-    private String domicilio;
-
-    @Column(nullable = false, length = 100)
-    private String localidad;
-
-    @Column(nullable = false, length = 10)
-    private String codigoPostal;
-
-    @Column(nullable = false, length = 100)
-    private String provincia;
+    @Embedded
+    private Direccion direccion;
 
     @Column(nullable = false, length = 15)
     private String telefono;

@@ -7,8 +7,6 @@ import java.util.List;
 
 @Service
 public interface CentroSaludService {
-    List<CentroSalud> listarCentrosSalud();
-    List<CentroSalud> buscarCentrosPorCriterio(String criterio);
     List<CentroSalud> buscarCentrosPorLocalidad(String localidad);
     List<CentroSalud> buscarCentrosPorNombre(String nombre);
     List<CentroSalud> buscarCentrosConFiltros(String nombre, String localidad);
