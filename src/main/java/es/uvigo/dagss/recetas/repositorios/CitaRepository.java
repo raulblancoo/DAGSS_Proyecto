@@ -3,6 +3,7 @@ package es.uvigo.dagss.recetas.repositorios;
 import es.uvigo.dagss.recetas.entidades.Cita;
 import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.entidades.Paciente;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,15 +11,47 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CitaRepository extends JpaRepository<Cita, Long> {
+    /**
+     * Encuentra todas las citas dentro de una fecha específica.
+     *
+     * @param startOfDay Inicio del día.
+     * @param endOfDay   Fin del día.
+     * @param sort       Ordenamiento.
+     * @return Lista de citas.
+     */
+    List<Cita> findByFechaHoraInicioBetween(LocalDateTime startOfDay, LocalDateTime endOfDay, Sort sort);
 
-    // Citas de un paciente en estado PLANIFICADA
-    List<Cita> findByPacienteAndEstado(Paciente paciente, Cita.EstadoCita estado);
+    /**
+     * Encuentra todas las citas dentro de una fecha específica y filtradas por médico.
+     *
+     * @param startOfDay Inicio del día.
+     * @param endOfDay   Fin del día.
+     * @param medicoId   ID del médico.
+     * @param sort       Ordenamiento.
+     * @return Lista de citas.
+     */
+    List<Cita> findByFechaHoraInicioBetweenAndMedicoId(LocalDateTime startOfDay, LocalDateTime endOfDay, Long medicoId, Sort sort);
 
-    // Citas planificadas para un médico en un día determinado
-    @Query("SELECT c FROM Cita c WHERE c.medico = :medico AND " +
-            "DATE(c.fechaHoraInicio) = DATE(:fecha)")
-    List<Cita> findPlanificadasByMedicoAndFecha(Medico medico, LocalDateTime fecha);
+    /**
+     * Encuentra todas las citas dentro de una fecha específica y filtradas por paciente.
+     *
+     * @param startOfDay  Inicio del día.
+     * @param endOfDay    Fin del día.
+     * @param pacienteId  ID del paciente.
+     * @param sort        Ordenamiento.
+     * @return Lista de citas.
+     */
+    List<Cita> findByFechaHoraInicioBetweenAndPacienteId(LocalDateTime startOfDay, LocalDateTime endOfDay, Long pacienteId, Sort sort);
 
-    // Filtrar por estado y rango de fechas
-    List<Cita> findByEstadoAndFechaHoraInicioBetween(Cita.EstadoCita estado, LocalDateTime inicio, LocalDateTime fin);
+    /**
+     * Encuentra todas las citas dentro de una fecha específica y filtradas por médico y paciente.
+     *
+     * @param startOfDay  Inicio del día.
+     * @param endOfDay    Fin del día.
+     * @param medicoId    ID del médico.
+     * @param pacienteId  ID del paciente.
+     * @param sort        Ordenamiento.
+     * @return Lista de citas.
+     */
+    List<Cita> findByFechaHoraInicioBetweenAndMedicoIdAndPacienteId(LocalDateTime startOfDay, LocalDateTime endOfDay, Long medicoId, Long pacienteId, Sort sort);
 }
