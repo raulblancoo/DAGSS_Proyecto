@@ -11,7 +11,7 @@ public interface PacienteRepository extends JpaRepository<Paciente, Long> {
     boolean existsByTarjetaSanitaria(String tarjetaSanitaria);
 
     List<Paciente> findByNombreLike(String nombre);
-    List<Paciente> findByLocalidadLike(String localidad);
+    List<Paciente> findByDireccion_LocalidadLike(String localidad);
     List<Paciente> findByCentroSalud_Id(Long id);
     List<Paciente> findByMedico_Id(Long id);
 

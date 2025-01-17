@@ -2,6 +2,7 @@ package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.entidades.Paciente;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
+import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.PacienteRepository;
 import es.uvigo.dagss.recetas.servicios.PacienteService;
@@ -30,7 +31,7 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Override
     public List<Paciente> buscarPacientesPorLocalidad(String localidad) {
-        return pacienteRepository.findByLocalidadLike(localidad);
+        return pacienteRepository.findByDireccion_LocalidadLike(localidad);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class PacienteServiceImpl implements PacienteService {
         } else if(nombre != null && localidad == null && centroSaludId == null && medicoId == null)  {
             return pacienteRepository.findByNombreLike(nombre);
         } else if(nombre == null && localidad != null && centroSaludId == null && medicoId == null) {
-            return pacienteRepository.findByLocalidadLike(localidad);
+            return pacienteRepository.findByDireccion_LocalidadLike(localidad);
         } else if(nombre == null && localidad == null && centroSaludId != null && medicoId == null) {
             return pacienteRepository.findByCentroSalud_Id(centroSaludId);
         } else if(nombre == null && localidad == null && centroSaludId == null && medicoId != null) {
@@ -82,10 +83,11 @@ public class PacienteServiceImpl implements PacienteService {
         return null;
     }
 
+    @Transactional
     @Override
     public void eliminarPaciente(Long id) {
         Paciente pacienteExistente = pacienteRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("aaaaa"));
+                orElseThrow(() -> new ResourceNotFoundException("No existe el paciente con id:" + id));
         pacienteExistente.desactivar();
         pacienteRepository.save(pacienteExistente);
     }

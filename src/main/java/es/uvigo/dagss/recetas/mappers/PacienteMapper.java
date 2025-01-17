@@ -1,9 +1,7 @@
 package es.uvigo.dagss.recetas.mappers;
 
-import es.uvigo.dagss.recetas.dtos.MedicoDto;
 import es.uvigo.dagss.recetas.dtos.PacienteCreateDto;
 import es.uvigo.dagss.recetas.dtos.PacienteDto;
-import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.entidades.Paciente;
 import org.mapstruct.*;
 
@@ -22,13 +20,12 @@ public interface PacienteMapper {
     @Mapping(source = "centroSaludId", target = "centroSalud.id")
     @Mapping(source = "medicoId", target = "medico.id")
     Paciente toEntity(PacienteCreateDto pacienteCreateDto);
-//
-//    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-//    @Mapping(source = "centroSaludId", target = "centroSalud.id")
-//    @Mapping(source = "medicoId", target = "medico.id")
-//    void updatePacienteFromDto(PacienteUpdateDto pacienteUpdateDto, @MappingTarget Paciente paciente);
 
+
+    @Mapping(source = "direccion.localidad", target = "localidad")
+    @Mapping(source = "direccion.provincia", target = "provincia")
     PacienteDto toDto(Paciente paciente);
+
     Paciente toEntity(PacienteDto pacienteDto);
     List<PacienteDto> toListDto(List<Paciente> medicos);
 }

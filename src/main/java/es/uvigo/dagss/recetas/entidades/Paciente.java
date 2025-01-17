@@ -26,17 +26,8 @@ public class Paciente extends Usuario {
     @Column(name = "NUMERO_SEGURIDAD_SOCIAL", nullable = false, unique = true, length = 20)
     private String numeroSeguridadSocial;
 
-    @Column(name = "DOMICILIO", length = 60)
-    private String domicilio;
-
-    @Column(name = "LOCALIDAD", length = 30)
-    private String localidad;
-
-    @Column(name = "CODIGO_POSTAL", length = 5)
-    private int codigoPostal;
-
-    @Column(name = "PROVINCIA", length = 30)
-    private String provincia;
+    @Embedded
+    private Direccion direccion;
 
     @Column(name = "TELEFONO", length = 20)
     private String telefono;
@@ -47,11 +38,11 @@ public class Paciente extends Usuario {
     @Column(name = "FECHA_NACIMIENTO", nullable = false)
     private Date fechaNacimiento;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "CENTRO_ID", nullable = false)
     private CentroSalud centroSalud;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "MEDICO_ID", nullable = false)
     private Medico medico;
 
@@ -62,8 +53,7 @@ public class Paciente extends Usuario {
 
     // Constructor adicional para inicializar tipo de usuario
     public Paciente(String login, String password, String nombre, String apellidos, String dni,
-                    String tarjetaSanitaria, String numeroSeguridadSocial, String domicilio, String localidad,
-                    int codigoPostal, String provincia, String telefono, String email, Date fechaNacimiento,
+                    String tarjetaSanitaria, String numeroSeguridadSocial,Direccion direccion, String telefono, String email, Date fechaNacimiento,
                     CentroSalud centroSalud, Medico medico) {
         super(TipoUsuario.PACIENTE, login, password);
         this.nombre = nombre;
@@ -71,10 +61,7 @@ public class Paciente extends Usuario {
         this.dni = dni;
         this.tarjetaSanitaria = tarjetaSanitaria;
         this.numeroSeguridadSocial = numeroSeguridadSocial;
-        this.domicilio = domicilio;
-        this.localidad = localidad;
-        this.codigoPostal = codigoPostal;
-        this.provincia = provincia;
+        this.direccion = direccion;
         this.telefono = telefono;
         this.email = email;
         this.fechaNacimiento = fechaNacimiento;
