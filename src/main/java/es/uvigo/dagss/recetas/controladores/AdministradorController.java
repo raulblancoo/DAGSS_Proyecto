@@ -1,36 +1,53 @@
 package es.uvigo.dagss.recetas.controladores;
 
-import es.uvigo.dagss.recetas.dtos.CentroSaludDto;
-import es.uvigo.dagss.recetas.dtos.MedicoDto;
-import es.uvigo.dagss.recetas.entidades.Administrador;
-import es.uvigo.dagss.recetas.entidades.CentroSalud;
-import es.uvigo.dagss.recetas.entidades.Medico;
+import es.uvigo.dagss.recetas.dtos.*;
+import es.uvigo.dagss.recetas.entidades.*;
 import es.uvigo.dagss.recetas.mappers.CentroSaludMapper;
+import es.uvigo.dagss.recetas.mappers.FarmaciaMapper;
 import es.uvigo.dagss.recetas.mappers.MedicoMapper;
-import es.uvigo.dagss.recetas.servicios.AdministradorService;
-import es.uvigo.dagss.recetas.servicios.CentroSaludService;
-import es.uvigo.dagss.recetas.servicios.MedicoService;
+import es.uvigo.dagss.recetas.mappers.PacienteMapper;
+import es.uvigo.dagss.recetas.servicios.*;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
 public class AdministradorController {
-    private final AdministradorService administradorService;
-    private final CentroSaludService centroSaludService;
-    private final CentroSaludMapper centroSaludMapper;
-    private final MedicoService medicoService;
-    private final MedicoMapper medicoMapper;
+    @Autowired
+    AdministradorService administradorService;
+    @Autowired
+    CentroSaludService centroSaludService;
+    @Autowired
+    CentroSaludMapper centroSaludMapper;
+    @Autowired
+    MedicoService medicoService;
+    @Autowired
+    MedicoMapper medicoMapper;
+    @Autowired
+    PacienteService pacienteService;
+    @Autowired
+    PacienteMapper pacienteMapper;
+    @Autowired
+    private FarmaciaService farmaciaService;
+    @Autowired
+    private FarmaciaMapper farmaciaMapper;
 
-    public AdministradorController(AdministradorService administradorService, CentroSaludService centroSaludService, CentroSaludMapper centroSaludMapper, MedicoService medicoService, MedicoMapper medicoMapper) {
-        this.administradorService = administradorService;
-        this.centroSaludService = centroSaludService;
-        this.centroSaludMapper = centroSaludMapper;
-        this.medicoService = medicoService;
-        this.medicoMapper = medicoMapper;
-    }
+//    public AdministradorController(AdministradorService administradorService, CentroSaludService centroSaludService, CentroSaludMapper centroSaludMapper, MedicoService medicoService, MedicoMapper medicoMapper, PacienteService pacienteService, PacienteMapper pacienteMapper) {
+//        this.administradorService = administradorService;
+//        this.centroSaludService = centroSaludService;
+//        this.centroSaludMapper = centroSaludMapper;
+//        this.medicoService = medicoService;
+//        this.medicoMapper = medicoMapper;
+//        this.pacienteService = pacienteService;
+//        this.pacienteMapper = pacienteMapper;
+//    }
 
     /* GESTIÓN DE ADMINISTRADORES */
 
@@ -45,7 +62,7 @@ public class AdministradorController {
     }
 
     @PostMapping
-    public ResponseEntity<Administrador> crearAdministrador(@RequestBody Administrador administrador) {
+    public ResponseEntity<Administrador> crearAdministrador(@Valid @RequestBody Administrador administrador) {
         try {
             administradorService.crearAdministrador(
                     administrador.getLogin(), administrador.getPassword(),
@@ -73,23 +90,12 @@ public class AdministradorController {
 
     /* GESTIÓN DE CENTROS DE SALUD */
 
-    // TODO: verificar si necesitamos el like en el repositorio y no es mejor un containing...
     @GetMapping("/centroSalud")
     public ResponseEntity<List<CentroSaludDto>> listarCentrosSalud(
             @RequestParam(name = "nombre", required = false) String nombre,
             @RequestParam(name = "localidad", required = false) String localidad) {
 
-        List<CentroSalud> listaCentros;
-
-        if (nombre == null && localidad == null) {
-            listaCentros = centroSaludService.listarCentrosSalud();
-        } else if (nombre != null && localidad == null) {
-            listaCentros = centroSaludService.buscarCentrosPorNombre(nombre);
-        } else if (nombre == null && localidad != null) {
-            listaCentros = centroSaludService.buscarCentrosPorLocalidad(localidad);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        List<CentroSalud> listaCentros = centroSaludService.buscarCentrosConFiltros(nombre, localidad);
 
         if (listaCentros.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -98,10 +104,11 @@ public class AdministradorController {
         return ResponseEntity.ok(centroSaludMapper.toListDto(listaCentros));
     }
 
-    // TODO: debe devolver un 201
     @PostMapping("/centroSalud")
-    public ResponseEntity<CentroSalud> crearCentro(@RequestBody CentroSalud centroSalud) {
-        return ResponseEntity.ok(centroSaludService.crearCentro(centroSalud));
+    public ResponseEntity<CentroSalud> crearCentro(@Valid @RequestBody CentroSalud datosCentroSalud) {
+        CentroSalud centroSalud = centroSaludService.crearCentro(datosCentroSalud);
+        URI uri = crearURICentroSalud(centroSalud);
+        return ResponseEntity.created(uri).body(centroSalud);
     }
 
     // TODO: debe devolver un 200
@@ -124,21 +131,9 @@ public class AdministradorController {
             @RequestParam(name = "localidad", required = false) String localidad,
             @RequestParam(name = "centroSalud", required = false) Long centroSaludId) {
 
-        List<Medico> listaMedicos;
+        List<Medico> listaMedicos = medicoService.buscarMedicosConFiltros(nombre, localidad, centroSaludId);
 
-        if (nombre == null && localidad == null && centroSaludId == null) {
-            listaMedicos = medicoService.listarMedicos();
-        } else if (nombre != null && localidad == null && centroSaludId == null) {
-            listaMedicos = medicoService.buscarMedicosPorNombre(nombre);
-        } else if (nombre == null && localidad != null && centroSaludId == null) {
-            listaMedicos = medicoService.buscarMedicosPorLocalidad(localidad);
-        } else if (nombre == null && localidad == null && centroSaludId != null) {
-            listaMedicos = medicoService.buscarMedicosPorCentroSalud(centroSaludId);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
-
-        if(listaMedicos.isEmpty()) {
+        if (listaMedicos.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
@@ -146,13 +141,10 @@ public class AdministradorController {
     }
 
     @PostMapping("/medico")
-    public ResponseEntity<Medico> crearMedico(@RequestBody Medico medico) {
-        try {
-            medicoService.crearMedico(medico);
-            return ResponseEntity.ok(medico);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<Medico> crearMedico(@Valid @RequestBody Medico datosMedico) {
+        Medico medico = medicoService.crearMedico(datosMedico);
+        URI uri = crearURIMedico(medico);
+        return ResponseEntity.created(uri).body(medico);
     }
 
     // TODO: no funciona el método de editarMedico, corregir
@@ -170,5 +162,99 @@ public class AdministradorController {
     public void eliminarMedico(@PathVariable("medicoId") Long medicoId) {
         medicoService.eliminarMedico(medicoId);
     }
+
+    /* GESTIÓN DE PACIENTES */
+
+    @GetMapping("/paciente")
+    public ResponseEntity<List<PacienteDto>> listarPacientes(
+            @RequestParam(name = "nombre", required = false) String nombre,
+            @RequestParam(name = "localidad", required = false) String localidad,
+            @RequestParam(name = "centroSalud", required = false) Long centroSaludId,
+            @RequestParam(name = "medico", required = false) Long medicoId) {
+
+        List<Paciente> listaPacientes = pacienteService.buscarPacientesConFiltros(nombre, localidad, centroSaludId, medicoId);
+
+        if (listaPacientes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(pacienteMapper.toListDto(listaPacientes));
+    }
+
+    @PostMapping("/paciente")
+    public ResponseEntity<Paciente> crearPaciente(@Valid @RequestBody PacienteCreateDto datosPaciente) {
+        // TODO: si se ponen datos mal rollo médico o centrosalud inexistente peta
+        Paciente p = pacienteMapper.toEntity(datosPaciente);
+        Paciente paciente = pacienteService.crearPaciente(p);
+        URI uri = crearURIPaciente(paciente);
+        return ResponseEntity.created(uri).body(paciente);
+    }
+
+    // TODO: HACER
+    @PutMapping("/paciente/{pacienteId}")
+    public ResponseEntity<Paciente> editarPaciente(@PathVariable("pacienteId") Long pacienteId, @RequestBody PacienteCreateDto datosPaciente) {
+        //pacienteService.editarPaciente(pacienteId,datosPaciente);
+        return null;
+    }
+
+    @DeleteMapping("/paciente/{pacienteId}")
+    public void eliminarPaciente(@PathVariable("pacienteId") Long pacienteId) {
+        pacienteService.eliminarPaciente(pacienteId);
+    }
+
+
+    /* GESTIÓN DE FARMACIAS */
+
+    @GetMapping("/farmacia")
+    public ResponseEntity<List<FarmaciaDto>> listarFarmacias(
+            @RequestParam(name = "nombre", required = false) String nombreEstablecimiento,
+            @RequestParam(name = "localidad", required = false) String localidad){
+
+        List<Farmacia> listaFarmacias = farmaciaService.buscarFarmaciasConFiltros(nombreEstablecimiento, localidad);
+
+        if (listaFarmacias.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(farmaciaMapper.toListDto(listaFarmacias));
+    }
+
+    @PostMapping("/farmacia")
+    public ResponseEntity<Farmacia> crearFarmacia(@Valid @RequestBody Farmacia datosFarmacia) {
+        Farmacia farmacia = farmaciaService.crearFarmacia(datosFarmacia);
+        URI uri = crearURIFarmacia(farmacia);
+        return ResponseEntity.created(uri).body(farmacia);
+
+    }
+
+    @PutMapping("/farmacia/{farmaciaId}")
+    public ResponseEntity<FarmaciaDto> editarFarmacia(@PathVariable("farmaciaId") Long farmaciaId,@Valid @RequestBody Farmacia datosFarmacia) {
+        return null;
+    }
+
+    @PostMapping("/farmacia/{farmaciaId}")
+    public void eliminarFarmacia(@PathVariable("farmaciaId") Long farmaciaId) {
+        // aaa
+    }
+
+
+    /* UTILS */
+
+    private URI crearURICentroSalud(CentroSalud centroSalud) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(centroSalud.getId()).toUri();
+    }
+
+    private URI crearURIMedico(Medico medico) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(medico.getId()).toUri();
+    }
+
+    private URI crearURIPaciente(Paciente paciente) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(paciente.getId()).toUri();
+    }
+
+    private URI crearURIFarmacia(Farmacia farmacia) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(farmacia.getId()).toUri();
+    }
+
 
 }
