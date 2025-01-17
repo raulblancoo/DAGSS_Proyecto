@@ -2,19 +2,18 @@ package es.uvigo.dagss.recetas.controladores;
 
 import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.*;
-import es.uvigo.dagss.recetas.mappers.CentroSaludMapper;
-import es.uvigo.dagss.recetas.mappers.FarmaciaMapper;
-import es.uvigo.dagss.recetas.mappers.MedicoMapper;
-import es.uvigo.dagss.recetas.mappers.PacienteMapper;
+import es.uvigo.dagss.recetas.mappers.*;
 import es.uvigo.dagss.recetas.servicios.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,6 +37,10 @@ public class AdministradorController {
     private FarmaciaService farmaciaService;
     @Autowired
     private FarmaciaMapper farmaciaMapper;
+    @Autowired
+    private CitaService citaService;
+    @Autowired
+    private CitaMapper citaMapper;
 
 //    public AdministradorController(AdministradorService administradorService, CentroSaludService centroSaludService, CentroSaludMapper centroSaludMapper, MedicoService medicoService, MedicoMapper medicoMapper, PacienteService pacienteService, PacienteMapper pacienteMapper) {
 //        this.administradorService = administradorService;
@@ -125,6 +128,7 @@ public class AdministradorController {
 
     /* GESTIÓN DE MÉDICOS */
 
+    // TODO: no se mappea bien la localidad y provincia del centro de salud
     @GetMapping("/medico")
     public ResponseEntity<List<MedicoDto>> listarMedicos(
             @RequestParam(name = "nombre", required = false) String nombre,
@@ -165,6 +169,7 @@ public class AdministradorController {
 
     /* GESTIÓN DE PACIENTES */
 
+    // TODO: no se mappea bien la localidad y provincia del centro de salud
     @GetMapping("/paciente")
     public ResponseEntity<List<PacienteDto>> listarPacientes(
             @RequestParam(name = "nombre", required = false) String nombre,
@@ -181,11 +186,11 @@ public class AdministradorController {
         return ResponseEntity.ok(pacienteMapper.toListDto(listaPacientes));
     }
 
+
     @PostMapping("/paciente")
-    public ResponseEntity<Paciente> crearPaciente(@Valid @RequestBody PacienteCreateDto datosPaciente) {
+    public ResponseEntity<Paciente> crearPaciente(@Valid @RequestBody Paciente datosPaciente) {
         // TODO: si se ponen datos mal rollo médico o centrosalud inexistente peta
-        Paciente p = pacienteMapper.toEntity(datosPaciente);
-        Paciente paciente = pacienteService.crearPaciente(p);
+        Paciente paciente = pacienteService.crearPaciente(datosPaciente);
         URI uri = crearURIPaciente(paciente);
         return ResponseEntity.created(uri).body(paciente);
     }
@@ -207,8 +212,8 @@ public class AdministradorController {
 
     @GetMapping("/farmacia")
     public ResponseEntity<List<FarmaciaDto>> listarFarmacias(
-            @RequestParam(name = "nombre", required = false) String nombreEstablecimiento,
-            @RequestParam(name = "localidad", required = false) String localidad){
+            @RequestParam(name = "nombreEstablecimiento", required = false) String nombreEstablecimiento,
+            @RequestParam(name = "localidad", required = false) String localidad) {
 
         List<Farmacia> listaFarmacias = farmaciaService.buscarFarmaciasConFiltros(nombreEstablecimiento, localidad);
 
@@ -228,14 +233,37 @@ public class AdministradorController {
     }
 
     @PutMapping("/farmacia/{farmaciaId}")
-    public ResponseEntity<FarmaciaDto> editarFarmacia(@PathVariable("farmaciaId") Long farmaciaId,@Valid @RequestBody Farmacia datosFarmacia) {
+    public ResponseEntity<FarmaciaDto> editarFarmacia(@PathVariable("farmaciaId") Long farmaciaId, @Valid @RequestBody Farmacia datosFarmacia) {
         return null;
     }
 
     @PostMapping("/farmacia/{farmaciaId}")
     public void eliminarFarmacia(@PathVariable("farmaciaId") Long farmaciaId) {
-        // aaa
+        farmaciaService.eliminarFarmacia(farmaciaId);
     }
+
+    /* GESTIÓN DE CITAS */
+
+    // TODO: Revisar y poner el método como en el resto de sitios
+    @GetMapping("/cita")
+    public ResponseEntity<List<CitaDto>> listarCitas(
+            @RequestParam("fecha") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate date,
+            @RequestParam(value = "medico", required = false) Long medicoId,
+            @RequestParam(value = "paciente", required = false) Long pacienteId) {
+
+        List<Cita> citas = citaService.listarCitas(date, medicoId, pacienteId);
+
+        return ResponseEntity.ok(citaMapper.toListDto(citas));
+    }
+
+    // TODO: Patch según CHATGPT es lo más correcto, es la verdad???
+    @PatchMapping("cita/{citaId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void anularCita(@PathVariable("citaId") Long citaId) {
+        citaService.anularCita(citaId);
+    }
+
+    /* GESTIÓN DE CITAS */
 
 
     /* UTILS */
