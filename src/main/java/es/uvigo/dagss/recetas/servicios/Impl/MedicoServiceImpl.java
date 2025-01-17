@@ -2,6 +2,7 @@ package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
+import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.MedicoRepository;
 import es.uvigo.dagss.recetas.servicios.MedicoService;
@@ -28,7 +29,7 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Override
     public List<Medico> buscarMedicosPorLocalidad(String localidad) {
-        return medicoRepository.findByCentroSalud_LocalidadLike(localidad);
+        return medicoRepository.findByCentroSalud_Direccion_LocalidadLike(localidad);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class MedicoServiceImpl implements MedicoService {
         } else if(nombre != null && localidad == null && centroSaludId == null) {
             return medicoRepository.findByNombreLike(nombre);
         } else if(nombre == null && localidad != null && centroSaludId == null) {
-            return medicoRepository.findByCentroSalud_LocalidadLike(localidad);
+            return medicoRepository.findByCentroSalud_Direccion_LocalidadLike(localidad);
         } else if(nombre == null && localidad == null && centroSaludId != null) {
             return medicoRepository.findByCentroSalud_Id(centroSaludId);
         } else {
@@ -107,7 +108,7 @@ public class MedicoServiceImpl implements MedicoService {
     @Override
     public void eliminarMedico(Long id) {
         Medico medicoExistente = medicoRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("No existe el medico con id: " + id));
+                orElseThrow(() -> new ResourceNotFoundException("No existe el medico con id: " + id));
         medicoExistente.desactivar();
         medicoRepository.save(medicoExistente);
     }

@@ -50,7 +50,7 @@ public class Medico extends Usuario {
     }
 
     public Medico(String login, String password, String nombre, String apellidos, String dni, String numeroColegiado, String telefono, String email, CentroSalud centroSalud) {
-        super(TipoUsuario.ADMINISTRADOR, login, password);
+        super(TipoUsuario.MEDICO, login, password);
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.dni = dni;
