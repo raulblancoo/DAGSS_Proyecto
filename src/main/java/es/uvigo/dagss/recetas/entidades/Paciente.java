@@ -26,8 +26,17 @@ public class Paciente extends Usuario {
     @Column(name = "NUMERO_SEGURIDAD_SOCIAL", nullable = false, unique = true, length = 20)
     private String numeroSeguridadSocial;
 
-    @Column(name = "DIRECCION", length = 255)
-    private String direccion;
+    @Column(name = "DOMICILIO", length = 60)
+    private String domicilio;
+
+    @Column(name = "LOCALIDAD", length = 30)
+    private String localidad;
+
+    @Column(name = "CODIGO_POSTAL", length = 5)
+    private int codigoPostal;
+
+    @Column(name = "PROVINCIA", length = 30)
+    private String provincia;
 
     @Column(name = "TELEFONO", length = 20)
     private String telefono;
@@ -53,8 +62,8 @@ public class Paciente extends Usuario {
 
     // Constructor adicional para inicializar tipo de usuario
     public Paciente(String login, String password, String nombre, String apellidos, String dni,
-                    String tarjetaSanitaria, String numeroSeguridadSocial, String direccion,
-                    String telefono, String email, Date fechaNacimiento,
+                    String tarjetaSanitaria, String numeroSeguridadSocial, String domicilio, String localidad,
+                    int codigoPostal, String provincia, String telefono, String email, Date fechaNacimiento,
                     CentroSalud centroSalud, Medico medico) {
         super(TipoUsuario.PACIENTE, login, password);
         this.nombre = nombre;
@@ -62,7 +71,10 @@ public class Paciente extends Usuario {
         this.dni = dni;
         this.tarjetaSanitaria = tarjetaSanitaria;
         this.numeroSeguridadSocial = numeroSeguridadSocial;
-        this.direccion = direccion;
+        this.domicilio = domicilio;
+        this.localidad = localidad;
+        this.codigoPostal = codigoPostal;
+        this.provincia = provincia;
         this.telefono = telefono;
         this.email = email;
         this.fechaNacimiento = fechaNacimiento;
