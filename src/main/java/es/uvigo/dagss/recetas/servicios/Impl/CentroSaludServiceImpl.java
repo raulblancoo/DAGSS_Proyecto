@@ -1,9 +1,11 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.entidades.CentroSalud;
+import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.CentroSaludRepository;
 import es.uvigo.dagss.recetas.servicios.CentroSaludService;
 import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +35,19 @@ public class CentroSaludServiceImpl implements CentroSaludService {
     @Override
     public List<CentroSalud> buscarCentrosPorNombre(String nombre) {
         return centroSaludRepository.findByNombreLike(nombre);
+    }
+
+    @Override
+    public List<CentroSalud> buscarCentrosConFiltros(String nombre, String localidad) {
+        if (nombre == null && localidad == null) {
+            return centroSaludRepository.findAll();
+        } else if (nombre != null && localidad == null) {
+            return centroSaludRepository.findByNombreLike(nombre);
+        } else if (nombre == null && localidad != null) {
+            return centroSaludRepository.findByLocalidadLike(localidad);
+        } else {
+            throw new WrongParameterException("Solo se puede proporcionar un parámetro de filtro a la vez.");
+        }
     }
 
     @Transactional
