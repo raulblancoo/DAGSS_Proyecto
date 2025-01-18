@@ -33,7 +33,7 @@ public class Cita {
     private LocalDateTime fechaHoraInicio;
 
     @Column(nullable = false)
-    private Integer duracionMinutos; // Por defecto, 15 minutos
+    private Integer duracionMinutos = 15; // Por defecto, 15 minutos
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
