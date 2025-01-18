@@ -10,4 +10,6 @@ public interface FarmaciaRepository extends JpaRepository<Farmacia, Long> {
 
     List<Farmacia> findByNombreEstablecimientoLike(String nombreEstablecimiento);
     List<Farmacia> findByDireccion_LocalidadLike(String localidad);
+
+    Farmacia findByNumeroColegiado(String numeroColegiado);
 }
