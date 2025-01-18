@@ -33,6 +33,10 @@ public class Medicamento {
     @Column(nullable = false)
     private Boolean activo;
 
-    @OneToMany(mappedBy = "medicamento", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Receta> recetas;
+//    @OneToMany(mappedBy = "medicamento", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Receta> recetas;
+
+    // Relación uno a muchos con Prescripcion
+    @OneToMany(mappedBy = "medicamento")
+    private List<Prescripcion> prescripciones;
 }

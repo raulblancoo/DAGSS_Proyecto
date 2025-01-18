@@ -1,64 +1,44 @@
 package es.uvigo.dagss.recetas.controladores;
 
 import es.uvigo.dagss.recetas.entidades.Medicamento;
+import es.uvigo.dagss.recetas.mappers.MedicamentoMapper;
+import es.uvigo.dagss.recetas.repositorios.MedicamentoRepository;
 import es.uvigo.dagss.recetas.servicios.MedicamentoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/medicamento")
+@RequestMapping("/api/medicamentos")
 public class MedicamentoController {
 
-    private final MedicamentoService medicamentoService;
+    @Autowired
+    private MedicamentoService medicamentoService;
+    @Autowired
+    private MedicamentoMapper medicamentoMapper;
 
-    public MedicamentoController(MedicamentoService medicamentoService) {
-        this.medicamentoService = medicamentoService;
-    }
-
+    /**
+     * Endpoint: GET /api/medicamentos
+     * Descripción: Permite buscar medicamentos por nombre comercial, principio activo, fabricante o familia.
+     */
     @GetMapping
-    public List<Medicamento> listarMedicamentos() {
-        return medicamentoService.listarMedicamentos();
-    }
+    public ResponseEntity<?> buscarMedicamentos(
+            @RequestParam(name = "nombreComercial", required = false) String nombreComercial,
+            @RequestParam(name = "principioActivo", required = false) String principioActivo,
+            @RequestParam(name = "fabricante", required = false) String fabricante,
+            @RequestParam(name = "familia", required = false) String familia){
 
-    @RequestMapping(params = "nombreComercial", method = RequestMethod.GET)
-    public ResponseEntity<List<Medicamento>> buscarCentrosPorNombreComercial(@RequestParam(name = "nombreComercial", required = true) String nombreComercial) {
-        List<Medicamento> listaMedicamentos = medicamentoService.buscarMedicamentosPorNombreComercial(nombreComercial);
-        return ResponseEntity.ok(listaMedicamentos);
-    }
+        List<Medicamento> listaMedicamentos = medicamentoService.buscarMedicamentoConFiltros(nombreComercial, principioActivo, fabricante, familia);
 
-    // TODO: comprobar si hace falta pasarle un responseEntity incorrecto.
-    @RequestMapping(params = "principioActivo", method = RequestMethod.GET)
-    public ResponseEntity<List<Medicamento>> buscarCentrosPorPrincipioActivo(@RequestParam(name = "principioActivo", required = true) String principioActivo) {
-        List<Medicamento> listaMedicamentos = medicamentoService.buscarMedicamentosPorPrincipioActivo(principioActivo);
-        return ResponseEntity.ok(listaMedicamentos);
-    }
+        if (listaMedicamentos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
 
-    @RequestMapping(params = "fabricante", method = RequestMethod.GET)
-    public ResponseEntity<List<Medicamento>> buscarCentrosPorFabricante(@RequestParam(name = "fabricante", required = true) String fabricante) {
-        List<Medicamento> listaMedicamentos = medicamentoService.buscarMedicamentosPorFabricante(fabricante);
-        return ResponseEntity.ok(listaMedicamentos);
-    }
-
-    @RequestMapping(params = "familia", method = RequestMethod.GET)
-    public ResponseEntity<List<Medicamento>> buscarCentrosPorFamilia(@RequestParam(name = "familia", required = true) String familia) {
-        List<Medicamento> listaMedicamentos = medicamentoService.buscarMedicamentosPorFamilia(familia);
-        return ResponseEntity.ok(listaMedicamentos);
-    }
-
-    @PostMapping("/crear")
-    public Medicamento crearMedicamento(@RequestBody Medicamento centroSalud) {
-        return medicamentoService.crearMedicamento(centroSalud);
-    }
-
-    @PutMapping("/editar/{id}")
-    public Medicamento editarMedicamento(@PathVariable Long id, @RequestBody Medicamento datos) {
-        return medicamentoService.editarMedicamento(id, datos);
-    }
-
-    @DeleteMapping("/eliminar/{id}")
-    public void eliminarMedicamento(@PathVariable Long id) {
-        medicamentoService.eliminarMedicamento(id);
+        return ResponseEntity.ok(medicamentoMapper.toListDto(listaMedicamentos));
     }
 }
