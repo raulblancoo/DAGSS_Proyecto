@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface MedicoRepository extends JpaRepository<Medico, Long> {
+    Medico findByNumeroColegiado(String numeroColegiado);
     boolean existsByDniOrNumeroColegiado(String dni, String numeroColegiado);
 
     List<Medico> findByCentroSalud_Direccion_LocalidadLike(String direccion);
