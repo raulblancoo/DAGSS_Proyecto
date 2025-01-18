@@ -1,5 +1,6 @@
 package es.uvigo.dagss.recetas.controladores;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.*;
 import es.uvigo.dagss.recetas.mappers.*;
@@ -20,19 +21,19 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdministradorController {
     @Autowired
-    AdministradorService administradorService;
+    private AdministradorService administradorService;
     @Autowired
-    CentroSaludService centroSaludService;
+    private CentroSaludService centroSaludService;
     @Autowired
-    CentroSaludMapper centroSaludMapper;
+    private CentroSaludMapper centroSaludMapper;
     @Autowired
-    MedicoService medicoService;
+    private MedicoService medicoService;
     @Autowired
-    MedicoMapper medicoMapper;
+    private MedicoMapper medicoMapper;
     @Autowired
-    PacienteService pacienteService;
+    private PacienteService pacienteService;
     @Autowired
-    PacienteMapper pacienteMapper;
+    private PacienteMapper pacienteMapper;
     @Autowired
     private FarmaciaService farmaciaService;
     @Autowired
@@ -41,6 +42,10 @@ public class AdministradorController {
     private CitaService citaService;
     @Autowired
     private CitaMapper citaMapper;
+    @Autowired
+    private MedicamentoService medicamentoService;
+    @Autowired
+    private MedicamentoMapper medicamentoMapper;
 
 //    public AdministradorController(AdministradorService administradorService, CentroSaludService centroSaludService, CentroSaludMapper centroSaludMapper, MedicoService medicoService, MedicoMapper medicoMapper, PacienteService pacienteService, PacienteMapper pacienteMapper) {
 //        this.administradorService = administradorService;
@@ -246,6 +251,7 @@ public class AdministradorController {
 
     // TODO: Revisar y poner el método como en el resto de sitios
     @GetMapping("/cita")
+    @JsonView(Vistas.VistaCitaAdmin.class)
     public ResponseEntity<List<CitaDto>> listarCitas(
             @RequestParam("fecha") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate date,
             @RequestParam(value = "medico", required = false) Long medicoId,
@@ -263,7 +269,40 @@ public class AdministradorController {
         citaService.anularCita(citaId);
     }
 
-    /* GESTIÓN DE CITAS */
+    /* GESTIÓN DE MEDICAMENTOS */
+
+    @GetMapping("/medicamento")
+    public ResponseEntity<List<MedicamentoDto>> listarMedicamentos(
+            @RequestParam(name = "nombreComercial", required = false) String nombreComercial,
+            @RequestParam(name = "principioActivo", required = false) String principioActivo,
+            @RequestParam(name = "fabricante", required = false) String fabricante,
+            @RequestParam(name = "familia", required = false) String familia){
+
+        List<Medicamento> listaMedicamentos = medicamentoService.buscarMedicamentoConFiltros(nombreComercial, principioActivo, fabricante, familia);
+
+        if (listaMedicamentos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(medicamentoMapper.toListDto(listaMedicamentos));
+    }
+
+    @PostMapping("/medicamento")
+    public ResponseEntity<Medicamento> crearMedicamento(@Valid @RequestBody Medicamento datosMedicamento) {
+        Medicamento medicamento = medicamentoService.crearMedicamento(datosMedicamento);
+        URI uri = crearURIMedicamento(medicamento);
+        return ResponseEntity.created(uri).body(medicamento);
+    }
+
+    @PutMapping("/medicamento/{medicamentoId}")
+    public ResponseEntity<MedicamentoDto> editarMedicamento(@PathVariable("medicamentoId") Long medicamentoId, @Valid @RequestBody Medicamento datosMedicamento) {
+        return null;
+    }
+
+    @DeleteMapping("/medicamento/{medicamentoId}")
+    public void eliminarMedicamento(@PathVariable Long medicamentoId) {
+        medicamentoService.eliminarMedicamento(medicamentoId);
+    }
 
 
     /* UTILS */
@@ -282,6 +321,10 @@ public class AdministradorController {
 
     private URI crearURIFarmacia(Farmacia farmacia) {
         return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(farmacia.getId()).toUri();
+    }
+
+    private URI crearURIMedicamento(Medicamento medicamento) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(medicamento.getId()).toUri();
     }
 
 
