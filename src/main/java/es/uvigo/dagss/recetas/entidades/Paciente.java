@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -45,6 +46,14 @@ public class Paciente extends Usuario {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "MEDICO_ID", nullable = false)
     private Medico medico;
+
+    // Relación uno a muchos con Cita
+    @OneToMany(mappedBy = "paciente")
+    private List<Cita> citas;
+
+    // Relación uno a muchos con Prescripción
+    @OneToMany(mappedBy = "paciente")
+    private List<Prescripcion> prescripciones;
 
 
     public Paciente() {

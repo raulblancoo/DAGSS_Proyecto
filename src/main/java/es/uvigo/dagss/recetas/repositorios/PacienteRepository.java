@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface PacienteRepository extends JpaRepository<Paciente, Long> {
     Paciente findByTarjetaSanitaria(String tarjetaSanitaria);
+    Paciente findByNumeroSeguridadSocial(String numeroSeguridadSocial);
     boolean existsByTarjetaSanitaria(String tarjetaSanitaria);
 
     List<Paciente> findByNombreLike(String nombre);
