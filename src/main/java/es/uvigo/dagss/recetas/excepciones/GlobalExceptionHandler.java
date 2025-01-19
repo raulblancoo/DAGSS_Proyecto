@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,6 +85,19 @@ public class GlobalExceptionHandler {
         problemDetail.setDetail("An unexpected error occurred.");
         // Opcional: No exponer ex.getMessage() en producción por razones de seguridad
         // problemDetail.setDetail(ex.getMessage());
+        return problemDetail;
+    }
+
+    // Manejar RecetaNoServibleException
+    @ExceptionHandler(RecetaNoServibleException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // 400 Bad Request
+    public ProblemDetail handleRecetaNoServibleException(
+            RecetaNoServibleException ex, WebRequest request) {
+
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Receta No Servible");
+        problemDetail.setDetail(ex.getMessage());
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
     }
 }
