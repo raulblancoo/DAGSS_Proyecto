@@ -96,7 +96,7 @@ public class MedicoServiceImpl implements MedicoService {
             medicoEdit.setCentroSalud(datosMedico.getCentroSalud());
 //            medicoEdit.setPacientes(datosMedico.getPacientes());
 //            medicoEdit.setRecetas(datosMedico.getRecetas());
-            medicoEdit.setCitas(datosMedico.getCitas());
+//            medicoEdit.setCitas(datosMedico.getCitas());
             medicoEdit.setActivo(datosMedico.getActivo());
             medicoEdit.setLogin(datosMedico.getLogin());
             medicoEdit.setPassword(datosMedico.getPassword());
