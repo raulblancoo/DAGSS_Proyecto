@@ -2,27 +2,37 @@ package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
 import es.uvigo.dagss.recetas.dtos.DireccionDto;
+import es.uvigo.dagss.recetas.dtos.RecetaDto;
 import es.uvigo.dagss.recetas.dtos.UpdateFarmaciaProfileRequest;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import es.uvigo.dagss.recetas.entidades.Farmacia;
+import es.uvigo.dagss.recetas.entidades.Receta;
+import es.uvigo.dagss.recetas.excepciones.RecetaNoServibleException;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.FarmaciaRepository;
+import es.uvigo.dagss.recetas.repositorios.RecetaRepository;
 import es.uvigo.dagss.recetas.servicios.FarmaciaService;
+import es.uvigo.dagss.recetas.servicios.RecetaService;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
 public class FarmaciaServiceImpl implements FarmaciaService {
-    private final FarmaciaRepository farmaciaRepository;
+    @Autowired
+    private FarmaciaRepository farmaciaRepository;
+    @Autowired
+    private RecetaRepository recetaRepository;
 
-    public FarmaciaServiceImpl(FarmaciaRepository farmaciaRepository) {
-        this.farmaciaRepository = farmaciaRepository;
-    }
 
     @Override
     public List<Farmacia> buscarFarmaciasConFiltros(String nombreEstablecimiento, String localidad) {
@@ -76,7 +86,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
     public void updatePerfil(UpdateFarmaciaProfileRequest request, String numeroColegiado) {
         Farmacia farmacia = getCurrentFarmacia(numeroColegiado);
 
-        farmacia.setNombreFarmaceutico(request.getNombre());
+        farmacia.setNombreEstablecimiento(request.getNombreEstablecimiento());
         farmacia.setTelefono(request.getTelefono());
         farmacia.setEmail(request.getEmail());
 
@@ -116,21 +126,46 @@ public class FarmaciaServiceImpl implements FarmaciaService {
     }
 
     @Override
-    public void servirReceta(Long receta_id, Long farmaciaId) {
-//        Farmacia farmacia = farmaciaRepository.findById(farmaciaId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Farmacia no encontrada."));
-//
-//        Receta receta = recetaRepository.findById(receta_id)
-//                .orElseThrow(() -> new IllegalArgumentException("Receta no encontrada."));
-//
-//        if (receta.getEstado() != Receta.Estado.PLANIFICADA) {
-//            throw new IllegalArgumentException("Solo se pueden servir recetas en estado PLANIFICADA.");
-//        }
-//
-//        // Vincula la receta con la farmacia y actualiza el estado
-//        receta.setFarmacia(farmacia);
-//        receta.setEstado(Receta.Estado.SERVIDA);
-//        recetaRepository.save(receta);
+    public void servirReceta(Long recetaId, Long farmaciaId) {
+        Farmacia farmacia = farmaciaRepository.findById(farmaciaId)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe la farmacia con id:" + farmaciaId));
+
+        Receta receta = recetaRepository.findById(recetaId)
+                .orElseThrow(() -> new ResourceNotFoundException("No existe la receta con id:" + recetaId));
+
+        if (receta.getEstado() != Receta.Estado.PLANIFICADA) {
+            throw new IllegalArgumentException("Solo se pueden servir recetas en estado PLANIFICADA.");
+        }
+
+        Date now = new Date();
+        if (receta.getFechaValidezInicial() != null && receta.getFechaValidezFinal() != null) {
+            Date fechaInicial = Date.from(receta.getFechaValidezInicial().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date fechaFinal = Date.from(receta.getFechaValidezFinal().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            if(fechaInicial.before(now) && fechaFinal.after(now)) {
+                receta.setFarmacia(farmacia);
+                receta.setEstado(Receta.Estado.SERVIDA);
+                recetaRepository.save(receta);
+            } else {
+                throw new RecetaNoServibleException("Esta receta no se puede servir porque no está dentro de las fechas correctas.");            }
+        } else {
+            throw new RecetaNoServibleException("Esta receta no se puede servir porque no está dentro de las fechas correctas.");
+        }
+    }
+
+    @Override
+    public void puedeServirReceta(List<RecetaDto> recetas) {
+        Date now = new Date();
+
+        for(RecetaDto receta : recetas) {
+            if (receta.getFechaValidezInicial() != null && receta.getFechaValidezFinal() != null) {
+                receta.setPuedeSerServida(
+                        !now.before(receta.getFechaValidezInicial()) && !now.after(receta.getFechaValidezFinal())
+                );
+            } else {
+                receta.setPuedeSerServida(false);
+            }
+        }
     }
 
     @Override

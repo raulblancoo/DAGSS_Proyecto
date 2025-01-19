@@ -1,12 +1,13 @@
 package es.uvigo.dagss.recetas.controladores;
 
-import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
-import es.uvigo.dagss.recetas.dtos.ServirRecetaRequest;
-import es.uvigo.dagss.recetas.dtos.UpdateFarmaciaProfileRequest;
+import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.Receta;
+import es.uvigo.dagss.recetas.mappers.FarmaciaMapper;
+import es.uvigo.dagss.recetas.mappers.RecetaMapper;
 import es.uvigo.dagss.recetas.servicios.FarmaciaService;
 import es.uvigo.dagss.recetas.servicios.RecetaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +22,19 @@ public class FarmaciaController {
     @Autowired
     private FarmaciaService farmaciaService;
     @Autowired
+    private FarmaciaMapper farmaciaMapper;
+    @Autowired
     private RecetaService recetaService;
+    @Autowired
+    private RecetaMapper recetaMapper;
+
 
     /**
      * Endpoint: GET /api/farmacia/{numColegiado}/home
      * Descripción: Devuelve las opciones disponibles en el menú para la farmacia.
      */
     @GetMapping("/home")
-    public ResponseEntity<?> getFarmaciaHome() {
+    public ResponseEntity<List<String>> getFarmaciaHome() {
         return ResponseEntity.ok(farmaciaService.getHomeOptions());
     }
 
@@ -37,8 +43,8 @@ public class FarmaciaController {
      * Descripción: Devuelve la información personal y profesional de la farmacia.
      */
     @GetMapping("/perfil")
-    public ResponseEntity<?> getPerfilFarmacia(@PathVariable("numColegiado") String numColegiado) {
-        return ResponseEntity.ok(farmaciaService.getPerfil(numColegiado));
+    public ResponseEntity<FarmaciaProfile> getPerfilFarmacia(@PathVariable("numColegiado") String numColegiado) {
+        return ResponseEntity.ok(farmaciaMapper.toProfileDto(farmaciaService.getPerfil(numColegiado)));
     }
 
     /**
@@ -46,7 +52,7 @@ public class FarmaciaController {
      * Descripción: Permite modificar datos personales de la farmacia.
      */
     @PutMapping("/perfil")
-    public ResponseEntity<?> updatePerfilFarmacia(
+    public ResponseEntity<String> updatePerfilFarmacia(
             @PathVariable("numColegiado") String numColegiado,
             @Validated @RequestBody UpdateFarmaciaProfileRequest request) {
         farmaciaService.updatePerfil(request, numColegiado);
@@ -69,22 +75,28 @@ public class FarmaciaController {
      * Endpoint: GET /api/farmacia/{numColegiado}/recetas
      * Descripción: Busca recetas de un paciente por número de tarjeta sanitaria.
      */
-    // TODO: mirar bien que hacer en este método
     @GetMapping("/recetas")
-    public ResponseEntity<?> getRecetasPorTarjetaSanitaria(@RequestParam String tarjetaSanitaria) {
+    public ResponseEntity<List<RecetaDto>> getRecetasPorTarjetaSanitaria(@RequestParam("tarjetaSanitaria") String tarjetaSanitaria) {
+
         List<Receta> recetas = recetaService.buscarRecetasPorTarjetaSanitaria(tarjetaSanitaria);
-        return ResponseEntity.ok(recetas);
+
+        if(recetas.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        List<RecetaDto> recetasDto = recetaMapper.toListDto(recetas);
+        farmaciaService.puedeServirReceta(recetasDto);
+
+        return ResponseEntity.ok(recetasDto);
     }
 
     /**
      * Endpoint: PUT /api/farmacia/{numColegiado}/recetas/{recetaId}/servir
      * Descripción: Marca una receta como SERVIDA y la vincula con la farmacia actual.
      */
-    @PutMapping("/recetas/{recetaId}/servir")
-    public ResponseEntity<?> servirReceta(
-            @PathVariable("recetaId") Long recetaId,
-            @RequestBody ServirRecetaRequest request) {
-        farmaciaService.servirReceta(recetaId, request.getFarmaciaId());
+    @PutMapping("/recetas")
+    public ResponseEntity<String> servirReceta(@RequestBody ServirRecetaRequest request) {
+        farmaciaService.servirReceta(request.getRecetaId(), request.getFarmaciaId());
         return ResponseEntity.ok("Receta servida exitosamente.");
     }
 }
