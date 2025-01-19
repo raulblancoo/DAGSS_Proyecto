@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.Cita;
 import es.uvigo.dagss.recetas.entidades.Prescripcion;
+import es.uvigo.dagss.recetas.entidades.Receta;
 import es.uvigo.dagss.recetas.mappers.CitaMapper;
 import es.uvigo.dagss.recetas.mappers.MedicoMapper;
 import es.uvigo.dagss.recetas.mappers.PrescripcionMapper;
@@ -66,7 +67,12 @@ public class MedicoController {
             fecha = LocalDate.now();
         }
 
-        return ResponseEntity.ok(citaMapper.toListDto(citaService.getAgenda(fecha, numColegiado)));
+        List<Cita> citas = citaService.getAgenda(fecha, numColegiado);
+        if(citas.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.ok(citaMapper.toListDto(citas));
     }
 
     /**
@@ -109,7 +115,13 @@ public class MedicoController {
     @GetMapping("/citas/{citaId}")
     @JsonView(Vistas.VistaCitaDetalleMedico.class)
     public ResponseEntity<CitaDto> getDetallesCita(@PathVariable("citaId") Long citaId) {
-        return ResponseEntity.ok(citaMapper.toDto(citaService.getDetallesCita(citaId)));
+        Cita cita = citaService.getDetallesCita(citaId);
+
+        if(cita == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.ok(citaMapper.toDto(cita));
     }
 
     /**
@@ -168,9 +180,15 @@ public class MedicoController {
      * Descripción: Retorna el plan de recetas generado para una prescripción específica.
      */
     @GetMapping("/prescripcion/{prescripcionId}/recetas")
+    @JsonView(Vistas.VistaRecetaMedico.class)
     public ResponseEntity<List<RecetaDto>> getPlanRecetas(@PathVariable Long prescripcionId) {
-        // TODO: solo ver las PLANIFICADAS y SERVIDAS
-        return ResponseEntity.ok(recetaMapper.toListDto(recetaService.buscarPlanesPorPrescripcionId(prescripcionId)));
+        List<Receta> recetas = recetaService.buscarPlanesPorPrescripcionId(prescripcionId);
+
+        if(recetas.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.ok(recetaMapper.toListDto(recetas));
     }
 
 }
