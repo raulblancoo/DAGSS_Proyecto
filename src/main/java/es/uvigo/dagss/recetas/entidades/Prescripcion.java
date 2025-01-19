@@ -52,5 +52,5 @@ public class Prescripcion {
 
     // Relación uno a muchos con PrescripcionPlan (Recetas)
     @OneToMany(mappedBy = "prescripcion")
-    private List<PrescripcionPlan> recetas;
+    private List<Receta> recetas;
 }

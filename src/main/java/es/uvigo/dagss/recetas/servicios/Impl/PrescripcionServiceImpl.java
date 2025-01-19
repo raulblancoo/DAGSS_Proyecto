@@ -3,7 +3,7 @@ package es.uvigo.dagss.recetas.servicios.Impl;
 import es.uvigo.dagss.recetas.dtos.CrearPrescripcionRequest;
 import es.uvigo.dagss.recetas.entidades.*;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
-import es.uvigo.dagss.recetas.repositorios.PrescripcionPlanRepository;
+import es.uvigo.dagss.recetas.repositorios.RecetaRepository;
 import es.uvigo.dagss.recetas.repositorios.PrescripcionRepository;
 import es.uvigo.dagss.recetas.servicios.*;
 import jakarta.transaction.Transactional;
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PrescripcionServiceImpl implements PrescripcionService {
@@ -25,9 +26,9 @@ public class PrescripcionServiceImpl implements PrescripcionService {
     @Autowired
     private MedicoService medicoService;
     @Autowired
-    private PrescripcionPlanService prescripcionPlanService;
+    private RecetaService recetaService;
     @Autowired
-    private PrescripcionPlanRepository prescripcionPlanRepository;
+    private RecetaRepository recetaRepository;
 
 
     @Override
@@ -55,21 +56,28 @@ public class PrescripcionServiceImpl implements PrescripcionService {
             generarPlanRecetas(prescripcion);
 
         } else {
-            throw new ResourceNotFoundException("mensaje");
+            throw new ResourceNotFoundException("medico= " +  medicoService.existsMedicoById(request.getMedicoId()) + "paciente=" + pacienteService.existsPacienteById(request.getPacienteId()) + "medicamento=" + medicamentoService.existsMedicamentoById(request.getMedicamentoId()) );
         }
-    }
-
-    @Override
-    public List<PrescripcionPlan> getPlanRecetas(Long prescripcionId) {
-        Prescripcion prescripcion = prescripcionRepository.findById(prescripcionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Prescripcion no encontrada"));
-
-        return prescripcionPlanService.buscarPlanesPorPrescripcion(prescripcion);
     }
 
     @Override
     public List<Prescripcion> findByPacienteAndEstado(Long pacienteId, Prescripcion.Estado estado) {
         return prescripcionRepository.findByPaciente_IdAndEstado(pacienteId, estado);
+    }
+
+    @Transactional
+    @Override
+    public void actualizarEstadoPrescripcion(Long prescripcionId, Prescripcion.Estado estado) {
+        Optional<Prescripcion> prescripcion = prescripcionRepository.findById(prescripcionId);
+
+        if(prescripcion.isPresent()) {
+            prescripcion.get().setEstado(estado);
+            recetaService.anularRecetaAsociada(prescripcionId);
+            prescripcionRepository.save(prescripcion.get());
+        } else {
+            throw new ResourceNotFoundException("Prescripcion con id " + prescripcionId + " no encontrada");
+        }
+
     }
 
     // TODO: Mirar como generamos los planes de receta
@@ -87,14 +95,14 @@ public class PrescripcionServiceImpl implements PrescripcionService {
         // Cálculo simplificado: una receta por semana
         LocalDate fechaActual = fechaInicio;
         while (!fechaActual.isAfter(fechaFin)) {
-            PrescripcionPlan receta = new PrescripcionPlan();
+            Receta receta = new Receta();
             receta.setPrescripcion(prescripcion);
             receta.setFechaValidezInicial(fechaActual);
             receta.setFechaValidezFinal(fechaActual.plusWeeks(1).minusDays(1));
             receta.setNumeroUnidades(1); // Asumiendo una caja por receta
-            receta.setEstado(PrescripcionPlan.Estado.PLANIFICADA);
+            receta.setEstado(Receta.Estado.PLANIFICADA);
             // Farmacia inicialmente nula
-            prescripcionPlanRepository.save(receta);
+            recetaRepository.save(receta);
             fechaActual = fechaActual.plusWeeks(1);
         }
     }
