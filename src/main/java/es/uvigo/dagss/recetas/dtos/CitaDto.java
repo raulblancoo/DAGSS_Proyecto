@@ -23,18 +23,18 @@ public class CitaDto {
     @JsonView(Vistas.VistaCitaDetalleMedico.class)
     private String direccion;
 
-    @JsonView(Vistas.VistaCitaAdmin.class)
-    private String nombreMedico;
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaDetallePaciente.class})
+    private String medico;
 
-    @JsonView(Vistas.VistaCitaAdmin.class)
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaDetallePaciente.class})
     private String centroSalud;
 
-    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class})
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class, Vistas.VistaCitaDetallePaciente.class})
     private LocalDateTime fechaHoraInicio;
 
-    @JsonView(Vistas.VistaCitaAgendaMedico.class)
+    @JsonView({Vistas.VistaCitaAgendaMedico.class,Vistas.VistaCitaDetallePaciente.class})
     private Integer duracionMinutos;
 
-    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class})
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class, Vistas.VistaCitaDetallePaciente.class})
     private Cita.EstadoCita estado;
 }

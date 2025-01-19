@@ -2,6 +2,7 @@ package es.uvigo.dagss.recetas.mappers;
 
 import es.uvigo.dagss.recetas.dtos.CitaDto;
 import es.uvigo.dagss.recetas.entidades.Cita;
+import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.entidades.Paciente;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,7 +20,7 @@ public interface CitaMapper {
     @Mapping(source = "paciente", target = "paciente", qualifiedByName = "concatNombreApellidos")
     @Mapping(source = "paciente.fechaNacimiento", target = "fechaNacimiento")
     @Mapping(source = "paciente", target = "direccion", qualifiedByName = "concatDireccion")
-    @Mapping(source = "medico.nombre", target = "nombreMedico")
+    @Mapping(source = "medico", target = "medico", qualifiedByName = "concatNombreApellidosMedico")
     @Mapping(source = "centroSalud.nombre", target = "centroSalud")
     CitaDto toDto(Cita cita);
 
@@ -33,6 +34,11 @@ public interface CitaMapper {
     @Named("concatDireccion")
     default String concatDireccion(Paciente paciente) {
         return paciente.getDireccion().toString();
+    }
+
+    @Named("concatNombreApellidosMedico")
+    default String concatNombreApellidosMedico(Medico medico) {
+        return medico.getNombre() + " " + medico.getApellidos();
     }
 
     //TODO: proceso de parsear la fecha a formato /dd/MM/yy

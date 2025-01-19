@@ -87,11 +87,21 @@ public class CitaServiceImpl implements CitaService {
     @Override
     public List<Cita> getAgenda(LocalDate fecha, String numColegiado) {
         Medico medico = medicoService.findMedicoByNumColegiado(numColegiado);
-        return citaRepository.findByMedicoAndFechaHoraInicioBetween(
+        List<Cita> citas = citaRepository.findByMedicoAndFechaHoraInicioBetween(
                 medico,
                 fecha.atStartOfDay(),
                 fecha.plusDays(1).atStartOfDay()
         );
+
+        List<Cita> toret = new ArrayList<>();
+
+        for(Cita cita : citas) {
+            if(cita.getEstado().equals(Cita.EstadoCita.PLANIFICADA)) {
+                toret.add(cita);
+            }
+        }
+
+        return toret;
     }
 
 
@@ -135,8 +145,10 @@ public class CitaServiceImpl implements CitaService {
 
         // Elimina los huecos que ya están ocupados
         for (Cita cita : citas) {
-            String hora = cita.getFechaHoraInicio().toLocalTime().toString();
-            huecos.remove(hora);
+            if(cita.getEstado().equals(Cita.EstadoCita.PLANIFICADA) || cita.getEstado().equals(Cita.EstadoCita.COMPLETADA)) {
+                String hora = cita.getFechaHoraInicio().toLocalTime().toString();
+                huecos.remove(hora);
+            }
         }
 
         return huecos;
@@ -170,6 +182,7 @@ public class CitaServiceImpl implements CitaService {
         Cita cita = new Cita();
         cita.setMedico(medico);
         cita.setPaciente(paciente);
+        cita.setCentroSalud(paciente.getCentroSalud());
         cita.setFechaHoraInicio(request.getFechaHora());
         cita.setDuracionMinutos(15); // Duración fija de 15 minutos
         cita.setEstado(Cita.EstadoCita.PLANIFICADA);
