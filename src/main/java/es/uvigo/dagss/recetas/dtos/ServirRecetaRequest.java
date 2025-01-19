@@ -5,7 +5,6 @@ import lombok.Data;
 
 @Data
 public class ServirRecetaRequest {
-
     @NotNull(message = "El ID de la receta es obligatorio.")
     private Long recetaId;
 

@@ -49,7 +49,7 @@ public class MedicoController {
      * Descripción: Devuelve las opciones disponibles en el menú para el médico.
      */
     @GetMapping("/home")
-    public ResponseEntity<?> getMedicoHome() {
+    public ResponseEntity<List<String>> getMedicoHome() {
         return ResponseEntity.ok(medicoService.getHomeOptions());
     }
 

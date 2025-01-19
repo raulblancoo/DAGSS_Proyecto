@@ -1,7 +1,6 @@
 package es.uvigo.dagss.recetas.repositorios;
 
 import es.uvigo.dagss.recetas.entidades.Paciente;
-import es.uvigo.dagss.recetas.entidades.Prescripcion;
 import es.uvigo.dagss.recetas.entidades.Receta;
 import org.springframework.data.jpa.repository.JpaRepository;
 
