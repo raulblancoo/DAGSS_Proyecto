@@ -4,8 +4,10 @@ import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
 import es.uvigo.dagss.recetas.dtos.CrearCitaRequest;
 import es.uvigo.dagss.recetas.dtos.UpdatePacienteProfileRequest;
 import es.uvigo.dagss.recetas.entidades.Cita;
+import es.uvigo.dagss.recetas.entidades.Receta;
 import es.uvigo.dagss.recetas.servicios.CitaService;
 import es.uvigo.dagss.recetas.servicios.PacienteService;
+import es.uvigo.dagss.recetas.servicios.RecetaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,8 @@ public class PacienteController {
     private PacienteService pacienteService;
     @Autowired
     private CitaService citaService;
+    @Autowired
+    private RecetaService recetaService;
 
     /**
      * Endpoint: GET /api/paciente/{numSegSocial}/home
@@ -105,7 +109,7 @@ public class PacienteController {
      * Descripción: Marca el estado de la cita seleccionada como ANULADA y actualiza la lista de citas mostrada.
      */
     @PutMapping("/citas/{citaId}/anular")
-    public ResponseEntity<?> anularCita(@PathVariable Long citaId) {
+    public ResponseEntity<?> anularCita(@PathVariable("citaId") Long citaId) {
         citaService.anularCita(citaId);
         return ResponseEntity.ok("Cita anulada exitosamente.");
     }
@@ -122,14 +126,14 @@ public class PacienteController {
 
 
     /**
-     * Endpoint: GET /api/paciente/recetas
+     * Endpoint: GET /api/paciente/{numSegSocial}/recetas
      * Descripción: Retorna la lista de recetas pendientes de ser servidas ordenadas por fecha, de más próxima a más lejana.
      */
-//    @GetMapping("/recetas")
-//    public ResponseEntity<?> getRecetasPendientes() {
-//        List<Receta> recetas = pacienteService.getRecetasPendientes();
-//        return ResponseEntity.ok(recetas);
-//    }
+    @GetMapping("/recetas")
+    public ResponseEntity<?> getRecetasPendientes(@PathVariable("numSegSocial") String numSegSocial) {
+        List<Receta> recetas = recetaService.buscarRecetasPendientes(numSegSocial);
+        return ResponseEntity.ok(recetas);
+    }
 
 
 }
