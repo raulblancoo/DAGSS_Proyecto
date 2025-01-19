@@ -14,6 +14,7 @@ public interface RecetaMapper {
 
     @Mapping(source = "prescripcion.medicamento.nombreComercial", target = "medicamento")
     @Mapping(source = "prescripcion.medico", target = "medico", qualifiedByName = "concatNombreApellidosMedico")
+    @Mapping(target = "puedeSerServida", ignore = true) // Ignorar durante el mapeo inicial
     RecetaDto toDto(Receta receta);
 
     List<RecetaDto> toListDto(List<Receta> recetas);

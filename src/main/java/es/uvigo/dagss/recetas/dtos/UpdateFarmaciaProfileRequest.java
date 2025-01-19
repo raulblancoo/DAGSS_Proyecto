@@ -7,13 +7,9 @@ import lombok.Data;
 
 @Data
 public class UpdateFarmaciaProfileRequest {
-    @NotBlank(message = "El nombre es obligatorio.")
-    @Size(max = 50, message = "El nombre no puede exceder los 50 caracteres.")
-    private String nombre;
-
-    @NotBlank(message = "Los apellidos son obligatorios.")
-    @Size(max = 100, message = "Los apellidos no pueden exceder los 100 caracteres.")
-    private String apellidos;
+    @NotBlank(message = "El nombre del establecimiento es obligatorio.")
+    @Size(max = 100, message = "El nombre del establecimiento no puede exceder los 100 caracteres.")
+    private String nombreEstablecimiento;
 
     @NotBlank(message = "El teléfono es obligatorio.")
     @Size(max = 15, message = "El teléfono no puede exceder los 15 caracteres.")

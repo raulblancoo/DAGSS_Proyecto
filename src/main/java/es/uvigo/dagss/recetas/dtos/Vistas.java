@@ -7,4 +7,5 @@ public class Vistas {
     public static class VistaCitaDetallePaciente{}
     public static class VistaRecetaMedico{}
     public static class VistaRecetaPaciente{}
+    public static class VistaRecetaFarmacia{}
 }
