@@ -47,10 +47,10 @@ public class Medico extends Usuario {
 
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Cita> citas;
-
-    // Relación uno a muchos con Prescripción
-    @OneToMany(mappedBy = "medico")
-    private List<Prescripcion> prescripciones;
+//
+//    // Relación uno a muchos con Prescripción
+//    @OneToMany(mappedBy = "medico")
+//    private List<Prescripcion> prescripciones;
 
     public Medico() {
         super(TipoUsuario.MEDICO);

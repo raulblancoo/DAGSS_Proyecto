@@ -1,11 +1,17 @@
 package es.uvigo.dagss.recetas.controladores;
 
-import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
-import es.uvigo.dagss.recetas.dtos.CrearPrescripcionRequest;
-import es.uvigo.dagss.recetas.dtos.UpdateMedicoProfileRequest;
+import com.fasterxml.jackson.annotation.JsonView;
+import es.uvigo.dagss.recetas.dtos.*;
+import es.uvigo.dagss.recetas.entidades.Cita;
+import es.uvigo.dagss.recetas.entidades.Prescripcion;
+import es.uvigo.dagss.recetas.mappers.CitaMapper;
+import es.uvigo.dagss.recetas.mappers.MedicoMapper;
+import es.uvigo.dagss.recetas.mappers.PrescripcionMapper;
+import es.uvigo.dagss.recetas.mappers.RecetaMapper;
 import es.uvigo.dagss.recetas.servicios.CitaService;
 import es.uvigo.dagss.recetas.servicios.MedicoService;
 import es.uvigo.dagss.recetas.servicios.PrescripcionService;
+import es.uvigo.dagss.recetas.servicios.RecetaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -14,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/medico/{numColegiado}")
@@ -22,9 +29,19 @@ public class MedicoController {
     @Autowired
     private MedicoService medicoService;
     @Autowired
+    private MedicoMapper medicoMapper;
+    @Autowired
     private CitaService citaService;
     @Autowired
+    private CitaMapper citaMapper;
+    @Autowired
     private PrescripcionService prescripcionService;
+    @Autowired
+    private PrescripcionMapper prescripcionMapper;
+    @Autowired
+    private RecetaService recetaService;
+    @Autowired
+    private RecetaMapper recetaMapper;
 
     /**
      * Endpoint: GET /api/medico/{numColegiado}/home
@@ -40,15 +57,16 @@ public class MedicoController {
      * Descripción: Retorna la lista de citas del médico para la fecha especificada (por defecto, el día actual).
      */
     @GetMapping("/agenda")
-    public ResponseEntity<?> getAgenda(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha,
+    @JsonView(Vistas.VistaCitaAgendaMedico.class)
+    public ResponseEntity<List<CitaDto>> getAgenda(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fecha,
             @PathVariable("numColegiado") String numColegiado) {
 
         if (fecha == null) {
             fecha = LocalDate.now();
         }
 
-        return ResponseEntity.ok(citaService.getAgenda(fecha, numColegiado));
+        return ResponseEntity.ok(citaMapper.toListDto(citaService.getAgenda(fecha, numColegiado)));
     }
 
     /**
@@ -56,8 +74,8 @@ public class MedicoController {
      * Descripción: Devuelve la información personal y profesional del médico.
      */
     @GetMapping("/perfil")
-    public ResponseEntity<?> getPerfilMedico(@PathVariable("numColegiado") String numColegiado) {
-        return ResponseEntity.ok(medicoService.getPerfil(numColegiado));
+    public ResponseEntity<MedicoProfile> getPerfilMedico(@PathVariable("numColegiado") String numColegiado) {
+        return ResponseEntity.ok(medicoMapper.toProfileDto(medicoService.getPerfil(numColegiado)));
     }
 
     /**
@@ -65,7 +83,7 @@ public class MedicoController {
      * Descripción: Permite modificar datos personales del médico.
      */
     @PutMapping("/perfil")
-    public ResponseEntity<?> updatePerfilMedico(
+    public ResponseEntity<String> updatePerfilMedico(
             @Validated @RequestBody UpdateMedicoProfileRequest request,
             @PathVariable("numColegiado") String numColegiado) {
         medicoService.updatePerfil(request, numColegiado);
@@ -77,7 +95,7 @@ public class MedicoController {
      * Descripción: Permite al médico actualizar su contraseña de acceso.
      */
     @PutMapping("/perfil/cambiar-contrasena")
-    public ResponseEntity<?> changePasswordMedico(
+    public ResponseEntity<String> changePasswordMedico(
             @Validated @RequestBody ChangePasswordRequest request,
             @PathVariable("numColegiado") String numColegiado) {
         medicoService.changePassword(request, numColegiado);
@@ -88,19 +106,21 @@ public class MedicoController {
      * Endpoint: GET /api/medico/{numColegiado}/citas/{citaId}
      * Descripción: Devuelve la información detallada de una cita específica.
      */
-    @GetMapping("/{citaId}")
-    public ResponseEntity<?> getDetallesCita(@PathVariable("citaId") Long citaId) {
-        return ResponseEntity.ok(citaService.getDetallesCita(citaId));
+    @GetMapping("/citas/{citaId}")
+    @JsonView(Vistas.VistaCitaDetalleMedico.class)
+    public ResponseEntity<CitaDto> getDetallesCita(@PathVariable("citaId") Long citaId) {
+        return ResponseEntity.ok(citaMapper.toDto(citaService.getDetallesCita(citaId)));
     }
 
     /**
-     * Endpoint: PUT /api/medico/{numColegiado}/citas/{citaId}/estado
+     * Endpoint: PUT /api/medico/{numColegiado}/citas/{citaId}
      * Descripción: Actualiza el estado de una cita (PLANIFICADA, AUSENTE, COMPLETADA).
+     * Ejemplo: api/medico/CO12345/citas/1?estado=AUSENTE
      */
-    @PutMapping("/{citaId}/estado")
-    public ResponseEntity<?> actualizarEstadoCita(
+    @PutMapping("/citas/{citaId}")
+    public ResponseEntity<String> actualizarEstadoCita(
             @PathVariable("citaId") Long citaId,
-            @RequestParam String estado) {
+            @RequestParam Cita.EstadoCita estado) {
         citaService.actualizarEstadoCita(citaId, estado);
         return ResponseEntity.ok("Estado de la cita actualizado exitosamente.");
     }
@@ -109,32 +129,48 @@ public class MedicoController {
      * Endpoint: GET /api/medico/{numColegiado}/citas/{citaId}/prescripciones
      * Descripción: Retorna las prescripciones activas del paciente asociado a la cita.
      */
-    @GetMapping("/{citaId}/prescripciones")
-    public ResponseEntity<?> getPrescripcionesEnCita(@PathVariable("citaId") Long citaId) {
-        return ResponseEntity.ok(citaService.getPrescripcionesEnCita(citaId));
+    @GetMapping("/citas/{citaId}/prescripciones")
+    public ResponseEntity<List<PrescripcionDto>> getPrescripcionesEnCita(@PathVariable("citaId") Long citaId) {
+        List<Prescripcion> listaPrescripcion = citaService.getPrescripcionesEnCita(citaId);
+
+        if(listaPrescripcion.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
+        return ResponseEntity.ok(prescripcionMapper.toListDto(listaPrescripcion));
     }
 
     /**
      * Endpoint: POST /api/medico/{numColegiado}/prescripcion
      * Descripción: Crea una nueva prescripción para un paciente.
      */
-    @PostMapping
-    public ResponseEntity<?> crearPrescripcion(@RequestBody CrearPrescripcionRequest request) {
+    @PostMapping("/prescripcion")
+    public ResponseEntity<String> crearPrescripcion(@RequestBody CrearPrescripcionRequest request) {
         prescripcionService.crearPrescripcion(request);
         return new ResponseEntity<>("Prescripción creada exitosamente.", HttpStatus.CREATED);
     }
 
-    // TODO: falta eliminar Prescripción (Hu-m3) (marcar como inactiva)
+    /**
+     * Endpoint: PUT /api/medico/{numColegiado}/prescripcion/{prescripcionId}
+     * Descripción: Actualiza el estado de una prescripción (ACTIVO, INACTIVO).
+     * Ejemplo: api/medico/CO12345/prescripcion/1?estado=INACTIVO
+     */
+    @PutMapping("/prescripcion/{prescripcionId}")
+    public ResponseEntity<String> actualizarEstadoPrescripcion(
+            @PathVariable("prescripcionId") Long prescripcionId,
+            @RequestParam Prescripcion.Estado estado) {
+        prescripcionService.actualizarEstadoPrescripcion(prescripcionId, estado);
+        return ResponseEntity.ok("Estado de la cita actualizado exitosamente.");
+    }
 
     /**
      * Endpoint: GET /api/medico/{numColegiado}/prescripcion/{prescripcionId}/recetas
      * Descripción: Retorna el plan de recetas generado para una prescripción específica.
      */
-    @GetMapping("/prescripciones/{prescripcionId}/recetas")
-    public ResponseEntity<?> getPlanRecetas(@PathVariable Long prescripcionId) {
-        return ResponseEntity.ok(prescripcionService.getPlanRecetas(prescripcionId));
+    @GetMapping("/prescripcion/{prescripcionId}/recetas")
+    public ResponseEntity<List<RecetaDto>> getPlanRecetas(@PathVariable Long prescripcionId) {
+        // TODO: solo ver las PLANIFICADAS y SERVIDAS
+        return ResponseEntity.ok(recetaMapper.toListDto(recetaService.buscarPlanesPorPrescripcionId(prescripcionId)));
     }
-
-    // TODO: falta eliminar plan de recetas asociado a prescripción (marcar como anulada)
 
 }
