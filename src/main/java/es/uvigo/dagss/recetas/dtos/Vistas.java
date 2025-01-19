@@ -2,5 +2,9 @@ package es.uvigo.dagss.recetas.dtos;
 
 public class Vistas {
     public static class VistaCitaAdmin{}
-    public static class VistaCitaMedico{}
+    public static class VistaCitaAgendaMedico{}
+    public static class VistaCitaDetalleMedico{}
+
+
+    public static class VistaPerfilMedico{}
 }

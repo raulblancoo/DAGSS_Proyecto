@@ -2,31 +2,39 @@ package es.uvigo.dagss.recetas.dtos;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import es.uvigo.dagss.recetas.entidades.Cita;
+import es.uvigo.dagss.recetas.entidades.Direccion;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CitaDto {
-    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaMedico.class})
-    private String pacienteNombre;
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class, Vistas.VistaCitaDetalleMedico.class})
+    private String paciente;
+
+    @JsonView(Vistas.VistaCitaDetalleMedico.class)
+    private Date fechaNacimiento;
+
+    @JsonView(Vistas.VistaCitaDetalleMedico.class)
+    private String direccion;
 
     @JsonView(Vistas.VistaCitaAdmin.class)
-    private String medicoNombre;
+    private String nombreMedico;
 
     @JsonView(Vistas.VistaCitaAdmin.class)
-    private String centroSaludNombre;
+    private String centroSalud;
 
-    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaMedico.class})
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class})
     private LocalDateTime fechaHoraInicio;
 
-    @JsonView(Vistas.VistaCitaMedico.class)
+    @JsonView(Vistas.VistaCitaAgendaMedico.class)
     private Integer duracionMinutos;
 
-    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaMedico.class})
+    @JsonView({Vistas.VistaCitaAdmin.class, Vistas.VistaCitaAgendaMedico.class})
     private Cita.EstadoCita estado;
 }
