@@ -2,7 +2,6 @@ package es.uvigo.dagss.recetas.controladores;
 
 import es.uvigo.dagss.recetas.entidades.Medicamento;
 import es.uvigo.dagss.recetas.mappers.MedicamentoMapper;
-import es.uvigo.dagss.recetas.repositorios.MedicamentoRepository;
 import es.uvigo.dagss.recetas.servicios.MedicamentoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
