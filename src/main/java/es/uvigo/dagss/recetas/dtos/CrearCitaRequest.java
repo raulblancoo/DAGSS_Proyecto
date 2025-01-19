@@ -13,7 +13,7 @@ public class CrearCitaRequest {
     @Future(message = "La fecha y hora de la cita deben ser futuras.")
     private LocalDateTime fechaHora;
 
-    @NotNull(message = "El ID del médico asignado es obligatorio.")
-    private Long medicoAsignadoId;
+//    @NotNull(message = "El ID del médico asignado es obligatorio.")
+//    private Long medicoAsignadoId;
 }
 
