@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-
-
 @Entity
 @Data
 @DiscriminatorValue(value = "FARMACIA")
@@ -36,9 +33,6 @@ public class Farmacia extends Usuario {
 
     @Column(nullable = false, length = 100)
     private String email;
-
-    @OneToMany(mappedBy = "farmacia", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Receta> recetas;
 
     public Farmacia() {
         super(TipoUsuario.FARMACIA);

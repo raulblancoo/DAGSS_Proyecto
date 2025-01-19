@@ -3,11 +3,15 @@ package es.uvigo.dagss.recetas.controladores;
 import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
 import es.uvigo.dagss.recetas.dtos.ServirRecetaRequest;
 import es.uvigo.dagss.recetas.dtos.UpdateFarmaciaProfileRequest;
+import es.uvigo.dagss.recetas.entidades.Receta;
 import es.uvigo.dagss.recetas.servicios.FarmaciaService;
+import es.uvigo.dagss.recetas.servicios.RecetaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -16,6 +20,8 @@ public class FarmaciaController {
 
     @Autowired
     private FarmaciaService farmaciaService;
+    @Autowired
+    private RecetaService recetaService;
 
     /**
      * Endpoint: GET /api/farmacia/{numColegiado}/home
@@ -64,11 +70,11 @@ public class FarmaciaController {
      * Descripción: Busca recetas de un paciente por número de tarjeta sanitaria.
      */
     // TODO: mirar bien que hacer en este método
-//    @GetMapping("/recetas")
-//    public ResponseEntity<?> getRecetasPorTarjetaSanitaria(@RequestParam String tarjetaSanitaria) {
-//        List<Receta> recetas = farmaciaService.getRecetasPorTarjetaSanitaria(tarjetaSanitaria);
-//        return ResponseEntity.ok(recetas);
-//    }
+    @GetMapping("/recetas")
+    public ResponseEntity<?> getRecetasPorTarjetaSanitaria(@RequestParam String tarjetaSanitaria) {
+        List<Receta> recetas = recetaService.buscarRecetasPorTarjetaSanitaria(tarjetaSanitaria);
+        return ResponseEntity.ok(recetas);
+    }
 
     /**
      * Endpoint: PUT /api/farmacia/{numColegiado}/recetas/{recetaId}/servir
