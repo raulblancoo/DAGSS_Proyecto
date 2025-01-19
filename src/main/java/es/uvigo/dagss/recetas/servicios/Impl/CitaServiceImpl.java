@@ -10,6 +10,7 @@ import es.uvigo.dagss.recetas.repositorios.CitaRepository;
 import es.uvigo.dagss.recetas.servicios.CitaService;
 import es.uvigo.dagss.recetas.servicios.MedicoService;
 import es.uvigo.dagss.recetas.servicios.PacienteService;
+import es.uvigo.dagss.recetas.servicios.PrescripcionService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -29,6 +30,8 @@ public class CitaServiceImpl implements CitaService {
     private CitaRepository citaRepository;
     @Autowired
     private MedicoService medicoService;
+    @Autowired
+    private PrescripcionService prescripcionService;
 
 
     @Override
@@ -61,33 +64,24 @@ public class CitaServiceImpl implements CitaService {
     /* Relacionadas con médico */
     @Override
     public Cita getDetallesCita(Long citaId) {
-        // TODO: Validación correcta con nuestras excepciones
         return citaRepository.findById(citaId)
-                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada o no pertenece al médico."));
+                .orElseThrow(() -> new ResourceNotFoundException("Cita con id " + citaId + " no encontrada o no pertenece al médico."));
     }
 
     @Override
     @Transactional
-    public void actualizarEstadoCita(Long citaId, String estado) {
-        Cita cita = getDetallesCita(citaId);
-        Cita.EstadoCita nuevoEstado;
+    public void actualizarEstadoCita(Long citaId, Cita.EstadoCita estado) {
+        Cita cita = citaRepository.findById(citaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cita con id " + citaId + " no encontrada o no permitida."));
 
-        // TODO: mirar de validarlo con nuestras excepciones
-        try {
-            nuevoEstado = Cita.EstadoCita.valueOf(estado.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Estado de cita inválido.");
-        }
-
-        cita.setEstado(nuevoEstado);
+        cita.setEstado(estado);
         citaRepository.save(cita);
     }
 
     @Override
     public List<Prescripcion> getPrescripcionesEnCita(Long citaId) {
         Cita cita = getDetallesCita(citaId);
-//        return prescripcionRepository.findByPacienteAndEstado(cita.getPaciente(), Prescripcion.Estado.ACTIVO);
-        return null;
+        return prescripcionService.findByPacienteAndEstado(cita.getPaciente().getId(), Prescripcion.Estado.ACTIVO);
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface CitaService {
 
     /* Relacionadas con médico */
     Cita getDetallesCita(Long citaId);
-    void actualizarEstadoCita(Long citaId, String estado);
+    void actualizarEstadoCita(Long citaId, Cita.EstadoCita estado);
     List<Prescripcion> getPrescripcionesEnCita(Long citaId);
     List<Cita> getAgenda(LocalDate fecha, String numColegiado);
 
