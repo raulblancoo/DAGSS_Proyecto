@@ -1,69 +1,54 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
-import es.uvigo.dagss.recetas.dtos.RecetaDto;
-import es.uvigo.dagss.recetas.entidades.Farmacia;
 import es.uvigo.dagss.recetas.entidades.Paciente;
+import es.uvigo.dagss.recetas.entidades.Prescripcion;
 import es.uvigo.dagss.recetas.entidades.Receta;
-import es.uvigo.dagss.recetas.mappers.RecetaMapper;
+import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.repositorios.RecetaRepository;
-import es.uvigo.dagss.recetas.servicios.FarmaciaService;
 import es.uvigo.dagss.recetas.servicios.PacienteService;
 import es.uvigo.dagss.recetas.servicios.RecetaService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class RecetaServiceImpl implements RecetaService {
-    private final RecetaMapper recetaMapper;
-    private final RecetaRepository recetaRepository;
-    private final PacienteService pacienteService;
-    private final FarmaciaService farmaciaService;
+    @Autowired
+    private RecetaRepository recetaRepository;
+    @Autowired
+    private PacienteService pacienteService;
 
-    public RecetaServiceImpl(RecetaMapper recetaMapper, RecetaRepository recetaRepository, PacienteService pacienteService, FarmaciaService farmaciaService) {
-        this.recetaMapper = recetaMapper;
-        this.recetaRepository = recetaRepository;
-        this.pacienteService = pacienteService;
-        this.farmaciaService = farmaciaService;
-    }
-
-
-    /**
-     * HU-F2. [Farmacia] Consulta de recetas de un paciente
-     *
-     * @param tarjetaSanitaria
-     * @return Lista de recetas que este estén en vigor para ese paciente
-     */
     @Override
-    public List<RecetaDto> buscarRecetasActivasPorTarjetaSanitaria(String tarjetaSanitaria) {
-        // TODO: Gestionar excepciones cuando la tarjetaSanitaria incluída no es correcta (paciente vacío)
-        Paciente paciente = pacienteService.findByTarjetaSanitaria(tarjetaSanitaria);
-        return recetaRepository.findRecetasActivasPorPaciente(paciente, LocalDate.now());
+    public List<Receta> buscarPlanesPorPrescripcionId(Long prescripcionId) {
+        return recetaRepository.findByPrescripcion_IdAndEstadoIn(prescripcionId, Arrays.asList(Receta.Estado.SERVIDA, Receta.Estado.PLANIFICADA));
     }
 
-    /**
-     * HU-F3. [Farmacia] Anotación de recetas DISPENSADA
-     * @param recetaId
-     * @param farmaciaId
-     * @return Receta guardada en BD
-     */
     @Override
-    // TODO: Comprobar si tiene que devolver una Receta (puede devolver void)
-    public Receta anotarRecetaServida(Long recetaId, Long farmaciaId) {
-        Receta receta = recetaRepository.findRecetaPlanificadaValida(recetaId, LocalDate.now())
-                .orElseThrow(() -> new IllegalArgumentException("Receta no válida o fuera de periodo de validez"));
-
-        // TODO: La farmacia que viene puede ser vacía (hay que comprobar de alguna manera)
-        Farmacia farmacia = farmaciaService.findFarmaciaById(farmaciaId);
-
-        receta.setEstado(Receta.EstadoReceta.SERVIDA);
-        receta.setFarmacia(farmacia);
-
-        return recetaRepository.save(receta);
+    public List<Receta> buscarRecetasPorTarjetaSanitaria(String tarjetaSanitaria) {
+        return recetaRepository.findByPrescripcion_Paciente_TarjetaSanitaria(tarjetaSanitaria);
     }
 
+    @Override
+    public List<Receta> buscarRecetasPendientes(String numSegSocial) {
+        Paciente paciente = pacienteService.findPacienteByNumSeguridadSocial(numSegSocial);
+        return recetaRepository.findByPrescripcion_Paciente(paciente);
+    }
 
+    @Transactional
+    @Override
+    public void anularRecetaAsociada(Long prescripcionId) {
+        List<Receta> recetas = recetaRepository.findByPrescripcion_Id(prescripcionId);
 
+        if(recetas.isEmpty()){
+            throw new ResourceNotFoundException("No hay recetas asociadas a la prescripcion " + prescripcionId);
+        }
 
+        for (Receta receta : recetas) {
+            receta.setEstado(Receta.Estado.ANULADA);
+            recetaRepository.save(receta);
+        }
+    }
 }

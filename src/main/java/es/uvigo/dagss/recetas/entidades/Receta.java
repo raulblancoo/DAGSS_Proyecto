@@ -1,44 +1,44 @@
 package es.uvigo.dagss.recetas.entidades;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 
-@Entity
+import java.time.LocalDate;
+
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "receta")
 public class Receta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "paciente_id", nullable = false)
-    private Paciente paciente;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "medico_id", nullable = false)
-    private Medico medico;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "farmacia_id", nullable = false)
-    private Farmacia farmacia;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "medicamento_id", nullable = false)
-    private Medicamento medicamento;
+    @ManyToOne
+    @JoinColumn(name = "prescripcion_id", nullable = false)
+    private Prescripcion prescripcion;
 
     @Column(nullable = false)
-    private java.time.LocalDate fechaInicio;
+    private LocalDate fechaValidezInicial;
 
     @Column(nullable = false)
-    private java.time.LocalDate fechaFin;
+    private LocalDate fechaValidezFinal;
+
+    @Column(nullable = false)
+    private Integer numeroUnidades;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private EstadoReceta estado;
+    private Estado estado;
 
-    public enum EstadoReceta {
-        PLANIFICADA, SERVIDA, ANULADA
+    // Enumeración para los estados de la receta
+    public enum Estado {
+        PLANIFICADA,
+        SERVIDA,
+        ANULADA
     }
+
+    // Relación muchos a uno con Farmacia (puede ser nula)
+    @ManyToOne
+    @JoinColumn(name = "farmacia_id")
+    private Farmacia farmacia;
 }
