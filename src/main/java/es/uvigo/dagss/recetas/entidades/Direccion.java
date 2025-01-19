@@ -7,7 +7,6 @@ import java.io.Serializable;
 
 @Embeddable
 @EqualsAndHashCode
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -16,4 +15,9 @@ public class Direccion implements Serializable {
     private String localidad;
     private int codigoPostal;
     private String provincia;
+
+    @Override
+    public String toString() {
+        return domicilio + ", " +  localidad + ", " +  codigoPostal + ", " +  provincia;
+    }
 }
