@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
-
 @Entity
 @Data
 @DiscriminatorValue(value = "MEDICO")
@@ -36,21 +34,6 @@ public class Medico extends Usuario {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "centro_id", nullable = false)
     private CentroSalud centroSalud;
-
-//    @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Paciente> pacientes;
-
-//    @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Receta> recetas;
-
-
-
-    @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cita> citas;
-//
-//    // Relación uno a muchos con Prescripción
-//    @OneToMany(mappedBy = "medico")
-//    private List<Prescripcion> prescripciones;
 
     public Medico() {
         super(TipoUsuario.MEDICO);

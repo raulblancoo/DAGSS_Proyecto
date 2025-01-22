@@ -172,15 +172,19 @@ public class AdministradorController {
      * Descripción: Elimina lógicamente un centro de salud (activo = false).
      */
     @DeleteMapping("/centroSalud/{centroId}")
-    public ResponseEntity<String> eliminarCentroSalud(@PathVariable("centroId") Long centroId,) {
+    public ResponseEntity<String> eliminarCentroSalud(@PathVariable("centroId") Long centroId) {
         centroSaludService.eliminarCentro(centroId);
         return ResponseEntity.ok("Centro de salud eliminado exitosamente.");
     }
 
     /* GESTIÓN DE MÉDICOS */
 
-    // TODO: no se mappea bien la localidad y provincia del centro de salud
-    @GetMapping("/medico")
+    /**
+     * HU-A4: Gestión de médicos
+     * Endpoint: GET /api/admin/medicos
+     * Descripción: Obtiene la lista de médicos registrados con filtros opcionales.
+     */
+    @GetMapping("/medicos")
     public ResponseEntity<List<MedicoDto>> listarMedicos(
             @RequestParam(name = "nombre", required = false) String nombre,
             @RequestParam(name = "localidad", required = false) String localidad,
@@ -195,27 +199,38 @@ public class AdministradorController {
         return ResponseEntity.ok(medicoMapper.toListDto(listaMedicos));
     }
 
-    @PostMapping("/medico")
-    public ResponseEntity<Medico> crearMedico(@Valid @RequestBody Medico datosMedico) {
-        Medico medico = medicoService.crearMedico(datosMedico);
+    /**
+     * Endpoint: POST /api/admin/medicos
+     * Descripción: Crea un nuevo médico.
+     */
+    @PostMapping("/medicos")
+    public ResponseEntity<MedicoDto> crearMedico(
+            @Validated @RequestBody CrearMedicoRequest request) {
+        Medico medico = medicoService.crearMedico(request);
         URI uri = crearURIMedico(medico);
-        return ResponseEntity.created(uri).body(medico);
+        return ResponseEntity.created(uri).body(medicoMapper.toDto(medico));
     }
 
-    // TODO: no funciona el método de editarMedico, corregir
-    @PutMapping("/medico/{medicoId}")
-    public ResponseEntity<Medico> editarMedico(@PathVariable("medicoId") Long medicoId, @RequestBody Medico datos) {
-        try {
-            Medico medico = medicoService.editarMedico(medicoId, datos);
-            return ResponseEntity.ok(medico);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    /**
+     * Endpoint: PUT /api/admin/medicos/{medicoId}
+     * Descripción: Actualiza los datos de un médico existente.
+     */
+    @PutMapping("/medicos/{medicoId}")
+    public ResponseEntity<MedicoDto> actualizarMedico(
+            @PathVariable("medicoId") Long medicoId,
+            @Validated @RequestBody CrearMedicoRequest request) {
+        Medico medico = medicoService.actualizarMedico(medicoId, request);
+        return ResponseEntity.ok(medicoMapper.toDto(medico));
     }
 
-    @DeleteMapping("/medico/{medicoId}")
-    public void eliminarMedico(@PathVariable("medicoId") Long medicoId) {
+    /**
+     * Endpoint: DELETE /api/admin/medicos/{medicoId}
+     * Descripción: Elimina lógicamente un médico (activo = false).
+     */
+    @DeleteMapping("/medicos/{medicoId}")
+    public ResponseEntity<String> eliminarMedico(@PathVariable("medicoId") Long medicoId) {
         medicoService.eliminarMedico(medicoId);
+        return ResponseEntity.ok("Médico eliminado exitosamente.");
     }
 
     /* GESTIÓN DE PACIENTES */

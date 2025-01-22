@@ -71,4 +71,10 @@ public class CentroSaludServiceImpl implements CentroSaludService {
         centroExistente.setActivo(false);
         centroSaludRepository.save(centroExistente);
     }
+
+    @Override
+    public CentroSalud buscarCentroPorId(Long id) {
+        return centroSaludRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("No existe el centro de salud con id:" + id));
+    }
 }

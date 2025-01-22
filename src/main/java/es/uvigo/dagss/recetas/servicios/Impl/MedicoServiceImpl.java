@@ -1,58 +1,40 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
+import es.uvigo.dagss.recetas.dtos.CrearMedicoRequest;
 import es.uvigo.dagss.recetas.dtos.DireccionDto;
 import es.uvigo.dagss.recetas.dtos.UpdateMedicoProfileRequest;
-import es.uvigo.dagss.recetas.entidades.Cita;
+import es.uvigo.dagss.recetas.entidades.CentroSalud;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
-import es.uvigo.dagss.recetas.repositorios.CitaRepository;
 import es.uvigo.dagss.recetas.repositorios.MedicoRepository;
+import es.uvigo.dagss.recetas.servicios.CentroSaludService;
 import es.uvigo.dagss.recetas.servicios.MedicoService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MedicoServiceImpl implements MedicoService {
 
     @Autowired
     private  MedicoRepository medicoRepository;
-
-    @Override
-    public List<Medico> listarMedicos() {
-        return medicoRepository.findAll();
-    }
-
-    @Override
-    public List<Medico> buscarMedicosPorLocalidad(String localidad) {
-        return medicoRepository.findByCentroSalud_Direccion_LocalidadLike(localidad);
-    }
-
-    @Override
-    public List<Medico> buscarMedicosPorNombre(String nombre) {
-        return medicoRepository.findByNombreLike(nombre);
-    }
-
-    @Override
-    public List<Medico> buscarMedicosPorCentroSalud(Long centroSaludId) {
-        return medicoRepository.findByCentroSalud_Id(centroSaludId);
-    }
+    @Autowired
+    private CentroSaludService centroSaludService;
 
     @Override
     public List<Medico> buscarMedicosConFiltros(String nombre, String localidad, Long centroSaludId) {
         if(nombre == null && localidad == null && centroSaludId == null) {
             return medicoRepository.findAll();
         } else if(nombre != null && localidad == null && centroSaludId == null) {
-            return medicoRepository.findByNombreLike(nombre);
+            return medicoRepository.findByNombreContaining(nombre);
         } else if(nombre == null && localidad != null && centroSaludId == null) {
-            return medicoRepository.findByCentroSalud_Direccion_LocalidadLike(localidad);
+            return medicoRepository.findByDireccion_LocalidadContaining(localidad);
         } else if(nombre == null && localidad == null && centroSaludId != null) {
             return medicoRepository.findByCentroSalud_Id(centroSaludId);
         } else {
@@ -62,49 +44,24 @@ public class MedicoServiceImpl implements MedicoService {
 
     @Transactional
     @Override
-    public Medico crearMedico(Medico medico) {
+    public Medico crearMedico(CrearMedicoRequest request) {
 
-        if(medicoRepository.existsByDniOrNumeroColegiado(medico.getDni(), medico.getNumeroColegiado())) {
+        if(medicoRepository.existsByDniOrNumeroColegiado(request.getDni(), request.getNumeroColegiado())) {
             throw new ResourceAlreadyExistsException("Ya existe un médico con los datos proporcionados.");
         }
 
-        // TODO: validacion de que centro de salud es válido???'
-
-        Medico newMedico = new Medico(
-                medico.getLogin(), medico.getNumeroColegiado(),
-                medico.getNombre(), medico.getApellidos(), medico.getDni(),
-                medico.getNumeroColegiado(), medico.getDireccion(), medico.getTelefono(), medico.getEmail(), medico.getCentroSalud()
-        );
-
-        return medicoRepository.save(newMedico);
+        Medico medico = getMedicoFromRequest(new Medico(), request);
+        return medicoRepository.save(medico);
     }
 
-    // TODO: corregir, no funciona
     @Transactional
     @Override
-    public Medico editarMedico(Long id, Medico datosMedico) {
-        Optional<Medico> medico = medicoRepository.findById(id);
+    public Medico actualizarMedico(Long id, CrearMedicoRequest request) {
+        Medico medico = medicoRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("No existe el medico con id: " + id));
 
-        if(medico.isPresent()) {
-            Medico medicoEdit = medico.get();
-            medicoEdit.setNombre(datosMedico.getNombre());
-            medicoEdit.setApellidos(datosMedico.getApellidos());
-            medicoEdit.setDni(datosMedico.getDni());
-            medicoEdit.setNumeroColegiado(datosMedico.getNumeroColegiado());
-            medicoEdit.setTelefono(datosMedico.getTelefono());
-            medicoEdit.setEmail(datosMedico.getEmail());
-            medicoEdit.setCentroSalud(datosMedico.getCentroSalud());
-//            medicoEdit.setPacientes(datosMedico.getPacientes());
-//            medicoEdit.setRecetas(datosMedico.getRecetas());
-//            medicoEdit.setCitas(datosMedico.getCitas());
-            medicoEdit.setActivo(datosMedico.getActivo());
-            medicoEdit.setLogin(datosMedico.getLogin());
-            medicoEdit.setPassword(datosMedico.getPassword());
-
-            return medicoRepository.save(medicoEdit);
-        } else {
-            throw new IllegalArgumentException("El médico no existe");
-        }
+        Medico modifiedMedico = getMedicoFromRequest(medico, request);
+        return medicoRepository.save(modifiedMedico);
     }
 
     @Transactional
@@ -115,6 +72,27 @@ public class MedicoServiceImpl implements MedicoService {
         medicoExistente.desactivar();
         medicoRepository.save(medicoExistente);
     }
+
+    private Medico getMedicoFromRequest(Medico medico, CrearMedicoRequest request) {
+        // Ya tiene el manejo de la excepción en caso de que no exista
+        CentroSalud centroSalud = centroSaludService.buscarCentroPorId(request.getCentroSaludId());
+
+        medico.setLogin(request.getLogin());
+        medico.setPassword(request.getNumeroColegiado());
+        medico.setNombre(request.getNombre());
+        medico.setApellidos(request.getApellidos());
+        medico.setDni(request.getDni());
+        medico.setNumeroColegiado(request.getNumeroColegiado());
+        medico.setTelefono(request.getTelefono());
+        medico.setEmail(request.getEmail());
+        medico.setCentroSalud(centroSalud);
+        if(request.getDireccion() != null) {
+            medico.setDireccion(request.getDireccion());
+        }
+
+        return medico;
+    }
+
 
     @Override
     public List<String> getHomeOptions() {
@@ -190,11 +168,5 @@ public class MedicoServiceImpl implements MedicoService {
     // TODO: validaciones de existencia de médico
     private Medico getCurrentMedico(String numColegiado) {
         return medicoRepository.findByNumeroColegiado(numColegiado);
-
-//        String nombreUsuario = SecurityUtils.getCurrentUsername();
-//        User user = userRepository.findByNombreUsuario(nombreUsuario)
-//                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
-//        return medicoRepository.findByUser(user)
-//                .orElseThrow(() -> new IllegalArgumentException("Médico no encontrado."));
     }
 }

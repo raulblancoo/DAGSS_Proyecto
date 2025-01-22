@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 public class MedicoDto {
     private String nombre;
     private String apellidos;
-    private CentroSaludDto centroSalud;
+    // TODO: revisar mapeo
+//    private CentroSaludDto centroSalud;
+    private String centroSalud;
+    private String localidad;
+    private String provincia;
     private boolean activo;
 }
