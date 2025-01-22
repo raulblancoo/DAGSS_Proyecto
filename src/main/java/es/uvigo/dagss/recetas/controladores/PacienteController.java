@@ -138,17 +138,6 @@ public class PacienteController {
         return ResponseEntity.ok("Cita anulada exitosamente.");
     }
 
-//    /**
-//     * Endpoint: POST /api/paciente/citas/{cita_id}/confirmar
-//     * Descripción: Confirma la asignación de la cita en la fecha y hora indicada.
-//     */
-//    @PostMapping("/citas/{cita_id}/confirmar")
-//    public ResponseEntity<?> confirmarCita(@PathVariable Long cita_id) {
-//        pacienteService.confirmarCita(cita_id);
-//        return ResponseEntity.ok("Cita confirmada exitosamente.");
-//    }
-
-
     /**
      * Endpoint: GET /api/paciente/{numSegSocial}/recetas
      * Descripción: Retorna la lista de recetas pendientes de ser servidas ordenadas por fecha, de más próxima a más lejana.
