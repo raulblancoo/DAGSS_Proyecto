@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FarmaciaServiceImpl implements FarmaciaService {
@@ -81,7 +80,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
         farmacia.setTelefono(request.getTelefono());
         farmacia.setEmail(request.getEmail());
         return farmacia;
-    };
+    }
 
     @Override
     public List<String> getHomeOptions() {

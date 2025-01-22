@@ -8,9 +8,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -40,13 +37,4 @@ public interface CitaMapper {
     default String concatNombreApellidosMedico(Medico medico) {
         return medico.getNombre() + " " + medico.getApellidos();
     }
-
-    //TODO: proceso de parsear la fecha a formato /dd/MM/yy
-//    @Named("procesarFecha")
-//    default String concatFecha(Paciente paciente) {
-//        Instant instant = paciente.getFechaNacimiento().toInstant();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.of("UTC"));
-//        return formatter.format(instant);
-//    }
-
 }

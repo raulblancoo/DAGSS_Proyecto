@@ -11,8 +11,6 @@ import java.util.List;
 public interface CitaService {
     List<Cita> buscarCitasConParametros(LocalDate date, Long medicoId, Long pacienteId);
 
-    List<Cita> listarCitasMedico(String numColegiado);
-
     /* Relacionadas con médico */
     Cita getDetallesCita(Long citaId);
     void actualizarEstadoCita(Long citaId, Cita.EstadoCita estado);

@@ -235,7 +235,6 @@ public class AdministradorController {
 
     /* GESTIÓN DE PACIENTES */
 
-    // TODO: no se mappea bien la localidad y provincia del centro de salud
     /**
      * HU-A5: Gestión de pacientes
      * Endpoint: GET /api/admin/pacientes

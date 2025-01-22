@@ -30,7 +30,6 @@ public class Receta {
     @Column(nullable = false, length = 20)
     private Estado estado;
 
-    // Enumeración para los estados de la receta
     public enum Estado {
         PLANIFICADA,
         SERVIDA,

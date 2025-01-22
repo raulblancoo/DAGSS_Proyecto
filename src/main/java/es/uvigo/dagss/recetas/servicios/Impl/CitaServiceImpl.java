@@ -55,12 +55,6 @@ public class CitaServiceImpl implements CitaService {
         return citas;
     }
 
-    @Override
-    public List<Cita> listarCitasMedico(String numColegiado) {
-        // TODO: hacer que sólo devuelva las citas que tenga el día de hoy
-        return citaRepository.findByMedico_NumeroColegiado(numColegiado);
-    }
-
     /* Relacionadas con médico */
     @Override
     public Cita getDetallesCita(Long citaId) {
@@ -188,9 +182,5 @@ public class CitaServiceImpl implements CitaService {
         cita.setEstado(Cita.EstadoCita.PLANIFICADA);
 
         citaRepository.save(cita);
-    }
-
-    public List<Cita> findByPacienteAndEstado(Paciente paciente, Cita.EstadoCita estado) {
-        return citaRepository.findByPacienteAndEstado(paciente, estado);
     }
 }
