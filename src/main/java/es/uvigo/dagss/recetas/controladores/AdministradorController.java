@@ -47,16 +47,6 @@ public class AdministradorController {
     @Autowired
     private MedicamentoMapper medicamentoMapper;
 
-//    public AdministradorController(AdministradorService administradorService, CentroSaludService centroSaludService, CentroSaludMapper centroSaludMapper, MedicoService medicoService, MedicoMapper medicoMapper, PacienteService pacienteService, PacienteMapper pacienteMapper) {
-//        this.administradorService = administradorService;
-//        this.centroSaludService = centroSaludService;
-//        this.centroSaludMapper = centroSaludMapper;
-//        this.medicoService = medicoService;
-//        this.medicoMapper = medicoMapper;
-//        this.pacienteService = pacienteService;
-//        this.pacienteMapper = pacienteMapper;
-//    }
-
     /* GESTIÓN DE ADMINISTRADORES */
 
     @GetMapping
