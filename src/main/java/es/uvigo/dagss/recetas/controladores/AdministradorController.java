@@ -233,10 +233,16 @@ public class AdministradorController {
         return ResponseEntity.ok("Médico eliminado exitosamente.");
     }
 
+
     /* GESTIÓN DE PACIENTES */
 
     // TODO: no se mappea bien la localidad y provincia del centro de salud
-    @GetMapping("/paciente")
+    /**
+     * HU-A5: Gestión de pacientes
+     * Endpoint: GET /api/admin/pacientes
+     * Descripción: Obtiene la lista de pacientes registrados con filtros opcionales.
+     */
+    @GetMapping("/pacientes")
     public ResponseEntity<List<PacienteDto>> listarPacientes(
             @RequestParam(name = "nombre", required = false) String nombre,
             @RequestParam(name = "localidad", required = false) String localidad,
@@ -252,25 +258,37 @@ public class AdministradorController {
         return ResponseEntity.ok(pacienteMapper.toListDto(listaPacientes));
     }
 
-
-    @PostMapping("/paciente")
-    public ResponseEntity<Paciente> crearPaciente(@Valid @RequestBody Paciente datosPaciente) {
-        // TODO: si se ponen datos mal rollo médico o centrosalud inexistente peta
-        Paciente paciente = pacienteService.crearPaciente(datosPaciente);
+    /**
+     * Endpoint: POST /api/admin/pacientes
+     * Descripción: Crea un nuevo paciente.
+     */
+    @PostMapping("/pacientes")
+    public ResponseEntity<PacienteDto> crearPaciente(@Validated @RequestBody CrearPacienteRequest request) {
+        Paciente paciente = pacienteService.crearPaciente(request);
         URI uri = crearURIPaciente(paciente);
-        return ResponseEntity.created(uri).body(paciente);
+        return ResponseEntity.created(uri).body(pacienteMapper.toDto(paciente));
     }
 
-    // TODO: HACER
-    @PutMapping("/paciente/{pacienteId}")
-    public ResponseEntity<Paciente> editarPaciente(@PathVariable("pacienteId") Long pacienteId, @RequestBody PacienteCreateDto datosPaciente) {
-        //pacienteService.editarPaciente(pacienteId,datosPaciente);
-        return null;
+    /**
+     * Endpoint: PUT /api/admin/pacientes/{pacienteId}
+     * Descripción: Actualiza los datos de un paciente existente.
+     */
+    @PutMapping("/pacientes/{pacienteId}")
+    public ResponseEntity<PacienteDto> actualizarPaciente(
+            @PathVariable("pacienteId") Long pacienteId,
+            @Validated @RequestBody CrearPacienteRequest request) {
+        Paciente paciente = pacienteService.actualizarPaciente(pacienteId, request);
+        return ResponseEntity.ok(pacienteMapper.toDto(paciente));
     }
 
-    @DeleteMapping("/paciente/{pacienteId}")
-    public void eliminarPaciente(@PathVariable("pacienteId") Long pacienteId) {
+    /**
+     * Endpoint: DELETE /api/admin/pacientes/{pacienteId}
+     * Descripción: Elimina lógicamente un paciente (activo = false).
+     */
+    @DeleteMapping("/pacientes/{pacienteId}")
+    public ResponseEntity<String> eliminarPaciente(@PathVariable("pacienteId") Long pacienteId) {
         pacienteService.eliminarPaciente(pacienteId);
+        return ResponseEntity.ok("Paciente eliminado exitosamente.");
     }
 
 

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -12,49 +11,40 @@ import java.util.List;
 @DiscriminatorValue(value = "PACIENTE")
 public class Paciente extends Usuario {
 
-    @Column(name = "NOMBRE", nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String nombre;
 
-    @Column(name = "APELLIDOS", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String apellidos;
 
-    @Column(name = "DNI", nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 20)
     private String dni;
 
-    @Column(name = "TARJETA_SANITARIA", nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 20)
     private String tarjetaSanitaria;
 
-    @Column(name = "NUMERO_SEGURIDAD_SOCIAL", nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 20)
     private String numeroSeguridadSocial;
 
     @Embedded
     private Direccion direccion;
 
-    @Column(name = "TELEFONO", length = 20)
+    @Column(length = 20)
     private String telefono;
 
-    @Column(name = "EMAIL", length = 100)
+    @Column(length = 100)
     private String email;
 
-    @Column(name = "FECHA_NACIMIENTO", nullable = false)
+    @Column(nullable = false)
     private Date fechaNacimiento;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "CENTRO_ID", nullable = false)
+    @JoinColumn(nullable = false)
     private CentroSalud centroSalud;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "MEDICO_ID", nullable = false)
+    @JoinColumn(nullable = false)
     private Medico medico;
-
-    // Relación uno a muchos con Cita
-    @OneToMany(mappedBy = "paciente")
-    private List<Cita> citas;
-
-    // Relación uno a muchos con Prescripción
-    @OneToMany(mappedBy = "paciente")
-    private List<Prescripcion> prescripciones;
-
 
     public Paciente() {
         super(TipoUsuario.PACIENTE);

@@ -16,5 +16,6 @@ public interface CentroSaludService {
 
     /* OTROS MÉTODOS*/
     CentroSalud buscarCentroPorId(Long id);
+    boolean existeCentroPorId(Long id);
 
 }

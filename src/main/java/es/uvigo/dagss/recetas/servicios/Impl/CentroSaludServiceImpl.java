@@ -77,4 +77,9 @@ public class CentroSaludServiceImpl implements CentroSaludService {
         return centroSaludRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("No existe el centro de salud con id:" + id));
     }
+
+    @Override
+    public boolean existeCentroPorId(Long id) {
+        return centroSaludRepository.existsById(id);
+    }
 }

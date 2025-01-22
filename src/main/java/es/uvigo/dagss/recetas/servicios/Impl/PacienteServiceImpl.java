@@ -1,17 +1,17 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
 import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
+import es.uvigo.dagss.recetas.dtos.CrearPacienteRequest;
 import es.uvigo.dagss.recetas.dtos.DireccionDto;
 import es.uvigo.dagss.recetas.dtos.UpdatePacienteProfileRequest;
-import es.uvigo.dagss.recetas.entidades.Cita;
 import es.uvigo.dagss.recetas.entidades.Direccion;
-import es.uvigo.dagss.recetas.entidades.Medico;
 import es.uvigo.dagss.recetas.entidades.Paciente;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
-import es.uvigo.dagss.recetas.repositorios.CitaRepository;
 import es.uvigo.dagss.recetas.repositorios.PacienteRepository;
+import es.uvigo.dagss.recetas.servicios.CentroSaludService;
+import es.uvigo.dagss.recetas.servicios.MedicoService;
 import es.uvigo.dagss.recetas.servicios.PacienteService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,41 +25,19 @@ public class PacienteServiceImpl implements PacienteService {
     @Autowired
     private PacienteRepository pacienteRepository;
     @Autowired
-    private CitaRepository citaRepository;
+    private MedicoService medicoService;
+    @Autowired
+    private CentroSaludService centroSaludService;
 
-    @Override
-    public List<Paciente> listarPacientes() {
-        return pacienteRepository.findAll();
-    }
-
-    @Override
-    public List<Paciente> buscarPacientesPorLocalidad(String localidad) {
-        return pacienteRepository.findByDireccion_LocalidadLike(localidad);
-    }
-
-    @Override
-    public List<Paciente> buscarPacientesPorNombre(String nombre) {
-        return pacienteRepository.findByNombreLike(nombre);
-    }
-
-    @Override
-    public List<Paciente> buscarPacientesPorCentroSalud(Long centroSaludId) {
-        return pacienteRepository.findByCentroSalud_Id(centroSaludId);
-    }
-
-    @Override
-    public List<Paciente> buscarPacientesPorMedico(Long medicoId) {
-        return pacienteRepository.findByMedico_Id(medicoId);
-    }
 
     @Override
     public List<Paciente> buscarPacientesConFiltros(String nombre, String localidad, Long centroSaludId, Long medicoId) {
         if(nombre == null && localidad == null && centroSaludId == null && medicoId == null) {
             return pacienteRepository.findAll();
         } else if(nombre != null && localidad == null && centroSaludId == null && medicoId == null)  {
-            return pacienteRepository.findByNombreLike(nombre);
+            return pacienteRepository.findByNombreContaining(nombre);
         } else if(nombre == null && localidad != null && centroSaludId == null && medicoId == null) {
-            return pacienteRepository.findByDireccion_LocalidadLike(localidad);
+            return pacienteRepository.findByDireccion_LocalidadContaining(localidad);
         } else if(nombre == null && localidad == null && centroSaludId != null && medicoId == null) {
             return pacienteRepository.findByCentroSalud_Id(centroSaludId);
         } else if(nombre == null && localidad == null && centroSaludId == null && medicoId != null) {
@@ -71,19 +49,19 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Transactional
     @Override
-    public Paciente crearPaciente(Paciente paciente) {
-        if (pacienteRepository.existsByTarjetaSanitaria(paciente.getTarjetaSanitaria())) {
-            throw new ResourceAlreadyExistsException(
-                    "Ya existe un paciente con la tarjeta sanitaria proporcionada: " + paciente.getTarjetaSanitaria()
-            );
-        }
-
+    public Paciente crearPaciente(CrearPacienteRequest request) {
+        Paciente paciente = getPacienteFromRequest(new Paciente(), request);
         return pacienteRepository.save(paciente);
     }
 
+    @Transactional
     @Override
-    public Paciente editarPaciente(Long id, Paciente paciente) {
-        return null;
+    public Paciente actualizarPaciente(Long id, CrearPacienteRequest request) {
+        Paciente paciente = pacienteRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Paciente con id " + id + " no encontrado"));
+
+        Paciente modifiedPaciente = getPacienteFromRequest(paciente, request);
+        return pacienteRepository.save(modifiedPaciente);
     }
 
     @Transactional
@@ -93,6 +71,47 @@ public class PacienteServiceImpl implements PacienteService {
                 orElseThrow(() -> new ResourceNotFoundException("No existe el paciente con id:" + id));
         pacienteExistente.desactivar();
         pacienteRepository.save(pacienteExistente);
+    }
+
+    private void validatePacienteRequest(CrearPacienteRequest request) {
+        if (pacienteRepository.existsByTarjetaSanitaria(request.getTarjetaSanitaria())) {
+            throw new ResourceAlreadyExistsException("Ya existe un paciente con la tarjeta sanitaria proporcionada: " + request.getTarjetaSanitaria());
+        }
+        if(pacienteRepository.existsByNumeroSeguridadSocial(request.getNumeroSeguridadSocial())) {
+            throw new ResourceAlreadyExistsException("Ya existe un paciente con el número de la seguridad social: " + request.getNumeroSeguridadSocial());
+        }
+        if(pacienteRepository.existsByDni(request.getDni())) {
+            throw new ResourceAlreadyExistsException("Ya existe un paciente con el dni: " + request.getDni());
+        }
+        if(!medicoService.existsMedicoById(request.getMedicoAsignadoId())) {
+            throw new ResourceNotFoundException("No existe un médico con el id: " + request.getMedicoAsignadoId());
+        }
+        if(!centroSaludService.existeCentroPorId(request.getCentroSaludId())){
+            throw new ResourceNotFoundException("No existe un centro de Salud con el id: " + request.getCentroSaludId());
+        }
+        if(!medicoService.estaAsignadoACentro(request.getCentroSaludId(), request.getMedicoAsignadoId())){
+            throw new ResourceNotFoundException("El médico " + request.getMedicoAsignadoId() + " no forma parte del centro " + request.getCentroSaludId());
+        }
+    }
+
+    private Paciente getPacienteFromRequest(Paciente paciente, CrearPacienteRequest request) {
+        validatePacienteRequest(request);
+        paciente.setLogin(request.getLogin());
+        paciente.setPassword(request.getDni());
+        paciente.setNombre(request.getNombre());
+        paciente.setApellidos(request.getApellidos());
+        paciente.setDni(request.getDni());
+        paciente.setTarjetaSanitaria(request.getTarjetaSanitaria());
+        paciente.setNumeroSeguridadSocial(request.getNumeroSeguridadSocial());
+        if(request.getDireccion() != null) {
+            paciente.setDireccion(request.getDireccion());
+        }
+        paciente.setTelefono(request.getTelefono());
+        paciente.setEmail(request.getEmail());
+        paciente.setFechaNacimiento(request.getFechaNacimiento());
+        paciente.setCentroSalud(centroSaludService.buscarCentroPorId(request.getCentroSaludId()));
+        paciente.setMedico(medicoService.findMedicoById(request.getMedicoAsignadoId()));
+        return paciente;
     }
 
 

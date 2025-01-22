@@ -1,6 +1,7 @@
 package es.uvigo.dagss.recetas.servicios;
 
 import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
+import es.uvigo.dagss.recetas.dtos.CrearPacienteRequest;
 import es.uvigo.dagss.recetas.dtos.UpdatePacienteProfileRequest;
 import es.uvigo.dagss.recetas.entidades.Paciente;
 import org.springframework.stereotype.Service;
@@ -11,15 +12,9 @@ import java.util.List;
 public interface PacienteService {
 
     /* Métodos administrador*/
-    List<Paciente> listarPacientes();
-    List<Paciente> buscarPacientesPorLocalidad(String localidad);
-    List<Paciente> buscarPacientesPorNombre(String nombre);
-    List<Paciente> buscarPacientesPorCentroSalud(Long centroSaludId);
-    List<Paciente> buscarPacientesPorMedico(Long medicoId);
     List<Paciente> buscarPacientesConFiltros(String nombre, String localidad, Long centroSaludId, Long medicoId);
-
-    Paciente crearPaciente(Paciente medico);
-    Paciente editarPaciente(Long id, Paciente paciente);
+    Paciente crearPaciente(CrearPacienteRequest request);
+    Paciente actualizarPaciente(Long id, CrearPacienteRequest request);
     void eliminarPaciente(Long id);
 
     /* Métodos de paciente */

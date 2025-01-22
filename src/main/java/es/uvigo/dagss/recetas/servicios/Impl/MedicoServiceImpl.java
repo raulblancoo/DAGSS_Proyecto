@@ -165,6 +165,11 @@ public class MedicoServiceImpl implements MedicoService {
         return medicoRepository.findByNumeroColegiado(numColegiado);
     }
 
+    @Override
+    public boolean estaAsignadoACentro(Long centroId, Long medicoId) {
+        return findMedicoById(medicoId).getCentroSalud().getId().equals(centroId);
+    }
+
     // TODO: validaciones de existencia de médico
     private Medico getCurrentMedico(String numColegiado) {
         return medicoRepository.findByNumeroColegiado(numColegiado);

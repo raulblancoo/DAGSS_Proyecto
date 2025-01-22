@@ -27,4 +27,5 @@ public interface MedicoService {
     boolean existsMedicoById(Long medicoId);
     Medico findMedicoById(Long medicoId);
     Medico findMedicoByNumColegiado(String numColegiado);
+    boolean estaAsignadoACentro(Long centroId, Long medicoId);
 }
