@@ -1,9 +1,6 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
-import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
-import es.uvigo.dagss.recetas.dtos.DireccionDto;
-import es.uvigo.dagss.recetas.dtos.RecetaDto;
-import es.uvigo.dagss.recetas.dtos.UpdateFarmaciaProfileRequest;
+import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import es.uvigo.dagss.recetas.entidades.Farmacia;
 import es.uvigo.dagss.recetas.entidades.Receta;
@@ -14,16 +11,13 @@ import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.FarmaciaRepository;
 import es.uvigo.dagss.recetas.repositorios.RecetaRepository;
 import es.uvigo.dagss.recetas.servicios.FarmaciaService;
-import es.uvigo.dagss.recetas.servicios.RecetaService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -39,9 +33,9 @@ public class FarmaciaServiceImpl implements FarmaciaService {
         if(nombreEstablecimiento == null && localidad == null) {
             return farmaciaRepository.findAll();
         } else if (nombreEstablecimiento != null && localidad == null) {
-            return farmaciaRepository.findByNombreEstablecimientoLike(nombreEstablecimiento);
+            return farmaciaRepository.findByNombreEstablecimientoContaining(nombreEstablecimiento);
         } else if(nombreEstablecimiento == null && localidad != null) {
-            return farmaciaRepository.findByDireccion_LocalidadLike(localidad);
+            return farmaciaRepository.findByDireccion_LocalidadContaining(localidad);
         } else {
             throw new WrongParameterException("Solo se puede proporcionar un parámetro de filtro a la vez.");
         }
@@ -49,17 +43,22 @@ public class FarmaciaServiceImpl implements FarmaciaService {
 
     @Transactional
     @Override
-    public Farmacia crearFarmacia(Farmacia farmacia) {
-        if(farmaciaRepository.existsByDniOrNumeroColegiado(farmacia.getDni(), farmacia.getNumeroColegiado())) {
-            throw new ResourceAlreadyExistsException("Ya existe una farmacia con los datos proporcionados.");
+    public Farmacia crearFarmacia(CrearFarmaciaRequest request) {
+        if(farmaciaRepository.existsByDniOrNumeroColegiado(request.getDniFarmaceutico(), request.getNumeroColegiadoFarmaceutico())) {
+            throw new ResourceAlreadyExistsException("Ya existe una farmacia con los datos proporcionados." + request.getDniFarmaceutico() +" y/o " + request.getNumeroColegiadoFarmaceutico());
         }
 
+        Farmacia farmacia = getFarmaciaFromRequest(new Farmacia(), request);
         return farmaciaRepository.save(farmacia);
     }
 
     @Override
-    public Farmacia editarFarmacia(Long id, Farmacia farmacia) {
-        return null;
+    public Farmacia actualizarFarmacia(Long farmaciaId, CrearFarmaciaRequest request) {
+        Farmacia farmacia = farmaciaRepository.findById(farmaciaId).
+                orElseThrow(() -> new ResourceNotFoundException("Farmacia con id " + farmaciaId + " no encontrada"));
+
+        Farmacia modifiedFarmacia = getFarmaciaFromRequest(farmacia, request);
+        return farmaciaRepository.save(modifiedFarmacia);
     }
 
     @Transactional
@@ -70,6 +69,22 @@ public class FarmaciaServiceImpl implements FarmaciaService {
         farmaciaExistente.desactivar();
         farmaciaRepository.save(farmaciaExistente);
     }
+
+    private Farmacia getFarmaciaFromRequest(Farmacia farmacia, CrearFarmaciaRequest request) {
+        farmacia.setLogin(request.getLogin());
+        farmacia.setPassword(request.getNumeroColegiadoFarmaceutico());
+        farmacia.setNombreEstablecimiento(request.getNombreEstablecimiento());
+        farmacia.setNombreFarmaceutico(request.getNombreFarmaceutico());
+        farmacia.setApellidosFarmaceutico(request.getApellidosFarmaceutico());
+        farmacia.setDni(request.getDniFarmaceutico());
+        farmacia.setNumeroColegiado(request.getNumeroColegiadoFarmaceutico());
+        if(request.getDireccion() != null) {
+            farmacia.setDireccion(request.getDireccion());
+        }
+        farmacia.setTelefono(request.getTelefono());
+        farmacia.setEmail(request.getEmail());
+        return farmacia;
+    };
 
     @Override
     public List<String> getHomeOptions() {

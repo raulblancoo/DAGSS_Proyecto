@@ -1,6 +1,7 @@
 package es.uvigo.dagss.recetas.servicios;
 
 import es.uvigo.dagss.recetas.dtos.ChangePasswordRequest;
+import es.uvigo.dagss.recetas.dtos.CrearFarmaciaRequest;
 import es.uvigo.dagss.recetas.dtos.RecetaDto;
 import es.uvigo.dagss.recetas.dtos.UpdateFarmaciaProfileRequest;
 import es.uvigo.dagss.recetas.entidades.Farmacia;
@@ -14,8 +15,8 @@ import java.util.List;
 public interface FarmaciaService {
     /* Métodos para administrador */
     List<Farmacia> buscarFarmaciasConFiltros(String nombreEstablecimiento, String localidad);
-    Farmacia crearFarmacia(Farmacia farmacia);
-    Farmacia editarFarmacia(Long id, Farmacia farmacia);
+    Farmacia crearFarmacia(CrearFarmaciaRequest request);
+    Farmacia actualizarFarmacia(Long id, CrearFarmaciaRequest request);
     void eliminarFarmacia(Long id);
 
     /* Métodos para farmacia */

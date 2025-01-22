@@ -8,8 +8,8 @@ import java.util.List;
 public interface FarmaciaRepository extends JpaRepository<Farmacia, Long> {
     boolean existsByDniOrNumeroColegiado(String dni, String numeroColegiado);
 
-    List<Farmacia> findByNombreEstablecimientoLike(String nombreEstablecimiento);
-    List<Farmacia> findByDireccion_LocalidadLike(String localidad);
+    List<Farmacia> findByNombreEstablecimientoContaining(String nombreEstablecimiento);
+    List<Farmacia> findByDireccion_LocalidadContaining(String localidad);
 
     Farmacia findByNumeroColegiado(String numeroColegiado);
 }
