@@ -13,6 +13,6 @@ public class AdministradorDto {
     private String login;
     private String nombre;
     private String email;
-    private Date fechaCreacion;
+    private String fechaCreacion;
     private boolean activo;
 }

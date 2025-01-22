@@ -60,11 +60,12 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     }
 
     private Medicamento getMedicamentoFromRequest(Medicamento medicamento, CrearMedicamentoRequest request) {
-        medicamento.setNombreComercial(medicamento.getNombreComercial());
-        medicamento.setPrincipioActivo(medicamento.getPrincipioActivo());
-        medicamento.setFabricante(medicamento.getFabricante());
-        medicamento.setFamilia(medicamento.getFamilia());
-        medicamento.setNumeroDosis(medicamento.getNumeroDosis());
+        medicamento.setNombreComercial(request.getNombreComercial());
+        medicamento.setPrincipioActivo(request.getPrincipioActivo());
+        medicamento.setFabricante(request.getFabricante());
+        medicamento.setFamilia(request.getFamilia());
+        medicamento.setNumeroDosis(request.getNumeroDosis());
+        medicamento.setActivo(true);
         return medicamento;
     }
 

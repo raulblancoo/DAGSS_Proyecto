@@ -28,7 +28,7 @@ public class RecetaServiceImpl implements RecetaService {
 
     @Override
     public List<Receta> buscarRecetasPorTarjetaSanitaria(String tarjetaSanitaria) {
-        return recetaRepository.findByPrescripcion_Paciente_TarjetaSanitaria(tarjetaSanitaria);
+        return recetaRepository.findByPrescripcion_Paciente_TarjetaSanitariaAndEstado(tarjetaSanitaria, Receta.Estado.PLANIFICADA);
     }
 
     @Override

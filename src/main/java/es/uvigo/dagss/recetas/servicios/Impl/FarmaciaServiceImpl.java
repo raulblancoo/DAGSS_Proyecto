@@ -145,7 +145,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
                 .orElseThrow(() -> new ResourceNotFoundException("No existe la receta con id:" + recetaId));
 
         if (receta.getEstado() != Receta.Estado.PLANIFICADA) {
-            throw new IllegalArgumentException("Solo se pueden servir recetas en estado PLANIFICADA.");
+            throw new ResourceNotFoundException("Solo se pueden servir recetas en estado PLANIFICADA.");
         }
 
         Date now = new Date();

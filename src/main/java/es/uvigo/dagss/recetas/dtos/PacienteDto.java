@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class PacienteDto {
     private String nombre;
     private String apellidos;
-    private CentroSaludDto centroSalud;
+    private String centro;
     private String localidad;
     private String provincia;
     private boolean activo;

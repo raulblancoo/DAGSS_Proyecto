@@ -42,7 +42,7 @@ public class AdministradorServiceImpl implements AdministradorService {
     @Transactional
     @Override
     public Administrador crearAdministrador(CrearAdminRequest request) {
-        if(administradorRepository.existsByEmail(request.getEmail())) {
+        if (administradorRepository.existsByEmail(request.getEmail())) {
             throw new ResourceAlreadyExistsException("El administrador con email " + request.getEmail() + "ya existe");
         }
 
@@ -55,14 +55,10 @@ public class AdministradorServiceImpl implements AdministradorService {
     public Administrador actualizarAdministrador(UpdateAdminRequest request, Long adminId) {
         Administrador admin = administradorRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el administrador con id: " + adminId));
-
-        if(administradorRepository.existsByEmail(request.getEmail())) {
-            admin.setNombre(request.getNombre());
-            admin.setEmail(request.getEmail());
-            return administradorRepository.save(admin);
-        } else {
-            throw new ResourceNotFoundException("No existe un administrador con email: " + request.getEmail());
-        }
+        
+        admin.setNombre(request.getNombre());
+        admin.setEmail(request.getEmail());
+        return administradorRepository.save(admin);
     }
 
     @Override
@@ -70,8 +66,8 @@ public class AdministradorServiceImpl implements AdministradorService {
         Administrador admin = administradorRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el administrador con id: " + adminId));
 
-        if(admin.getPassword().equals(request.getCurrentPassword())) {
-            if(request.getNewPassword().equals(request.getConfirmNewPassword())){
+        if (admin.getPassword().equals(request.getCurrentPassword())) {
+            if (request.getNewPassword().equals(request.getConfirmNewPassword())) {
                 admin.setPassword(request.getNewPassword());
                 administradorRepository.save(admin);
             } else {

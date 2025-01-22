@@ -91,7 +91,7 @@ public class FarmaciaController {
     }
 
     /**
-     * Endpoint: PUT /api/farmacia/{numColegiado}/recetas/{recetaId}/servir
+     * Endpoint: PUT /api/farmacia/{numColegiado}/recetas
      * Descripción: Marca una receta como SERVIDA y la vincula con la farmacia actual.
      */
     @PutMapping("/recetas")

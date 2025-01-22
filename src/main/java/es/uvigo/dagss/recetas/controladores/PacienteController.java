@@ -67,7 +67,7 @@ public class PacienteController {
     }
 
     /**
-     * Endpoint: PUT /api/paciente/perfil/password
+     * Endpoint: PUT /api/paciente/{numSegSocial}/perfil/password
      * Descripción: Permite al paciente actualizar su contraseña de acceso.
      */
     @PutMapping("/perfil/password")

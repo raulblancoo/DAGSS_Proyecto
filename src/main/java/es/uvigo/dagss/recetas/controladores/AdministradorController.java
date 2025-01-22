@@ -356,11 +356,20 @@ public class AdministradorController {
     @GetMapping("/citas")
     @JsonView(Vistas.VistaCitaAdmin.class)
     public ResponseEntity<List<CitaDto>> listarCitas(
-            @RequestParam("fecha") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fecha,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fecha,
             @RequestParam(name = "medico",required = false) Long medicoId,
             @RequestParam(name = "paciente",required = false) Long pacienteId) {
 
+        if (fecha == null) {
+            fecha = LocalDate.now();
+        }
+
         List<Cita> citas = citaService.buscarCitasConParametros(fecha, medicoId, pacienteId);
+
+        if(citas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(citaMapper.toListDto(citas));
     }
 
