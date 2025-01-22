@@ -294,7 +294,12 @@ public class AdministradorController {
 
     /* GESTIÓN DE FARMACIAS */
 
-    @GetMapping("/farmacia")
+    /**
+     * HU-A6: Gestión de farmacias
+     * Endpoint: GET /api/admin/farmacias
+     * Descripción: Obtiene la lista de farmacias registradas con filtros opcionales.
+     */
+    @GetMapping("/farmacias")
     public ResponseEntity<List<FarmaciaDto>> listarFarmacias(
             @RequestParam(name = "nombreEstablecimiento", required = false) String nombreEstablecimiento,
             @RequestParam(name = "localidad", required = false) String localidad) {
@@ -308,44 +313,66 @@ public class AdministradorController {
         return ResponseEntity.ok(farmaciaMapper.toListDto(listaFarmacias));
     }
 
-    @PostMapping("/farmacia")
-    public ResponseEntity<Farmacia> crearFarmacia(@Valid @RequestBody Farmacia datosFarmacia) {
-        Farmacia farmacia = farmaciaService.crearFarmacia(datosFarmacia);
+    /**
+     * Endpoint: POST /api/admin/farmacias
+     * Descripción: Crea una nueva farmacia.
+     */
+    @PostMapping("/farmacias")
+    public ResponseEntity<FarmaciaDto> crearFarmacia(
+            @Validated @RequestBody CrearFarmaciaRequest request) {
+        Farmacia farmacia = farmaciaService.crearFarmacia(request);
         URI uri = crearURIFarmacia(farmacia);
-        return ResponseEntity.created(uri).body(farmacia);
-
+        return ResponseEntity.created(uri).body(farmaciaMapper.toDto(farmacia));
     }
 
-    @PutMapping("/farmacia/{farmaciaId}")
-    public ResponseEntity<FarmaciaDto> editarFarmacia(@PathVariable("farmaciaId") Long farmaciaId, @Valid @RequestBody Farmacia datosFarmacia) {
-        return null;
+    /**
+     * Endpoint: PUT /api/admin/farmacias/{farmaciaId}
+     * Descripción: Actualiza los datos de una farmacia existente.
+     */
+    @PutMapping("/farmacias/{farmaciaId}")
+    public ResponseEntity<FarmaciaDto> actualizarFarmacia(@PathVariable("farmaciaId") Long farmaciaId,
+            @Validated @RequestBody CrearFarmaciaRequest request) {
+        Farmacia farmacia = farmaciaService.actualizarFarmacia(farmaciaId, request);
+        return ResponseEntity.ok(farmaciaMapper.toDto(farmacia));
     }
 
-    @PostMapping("/farmacia/{farmaciaId}")
-    public void eliminarFarmacia(@PathVariable("farmaciaId") Long farmaciaId) {
+    /**
+     * Endpoint: DELETE /api/admin/farmacias/{farmaciaId}
+     * Descripción: Elimina lógicamente una farmacia (activo = false).
+     */
+    @DeleteMapping("/farmacias/{farmaciaId}")
+    public ResponseEntity<String> eliminarFarmacia(@PathVariable("farmaciaId") Long farmaciaId) {
         farmaciaService.eliminarFarmacia(farmaciaId);
+        return ResponseEntity.ok("Farmacia eliminada exitosamente.");
     }
+
 
     /* GESTIÓN DE CITAS */
 
-    // TODO: Revisar y poner el método como en el resto de sitios
-    @GetMapping("/cita")
+    /**
+     * HU-A7: Gestión "manual" de citas
+     * Endpoint: GET /api/admin/citas
+     * Descripción: Obtiene la lista de citas registradas con filtros por fecha, médico y paciente.
+     */
+    @GetMapping("/citas")
     @JsonView(Vistas.VistaCitaAdmin.class)
     public ResponseEntity<List<CitaDto>> listarCitas(
-            @RequestParam("fecha") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate date,
-            @RequestParam(value = "medico", required = false) Long medicoId,
-            @RequestParam(value = "paciente", required = false) Long pacienteId) {
+            @RequestParam("fecha") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate fecha,
+            @RequestParam(name = "medico",required = false) Long medicoId,
+            @RequestParam(name = "paciente",required = false) Long pacienteId) {
 
-        List<Cita> citas = citaService.listarCitas(date, medicoId, pacienteId);
-
+        List<Cita> citas = citaService.buscarCitasConParametros(fecha, medicoId, pacienteId);
         return ResponseEntity.ok(citaMapper.toListDto(citas));
     }
 
-    // TODO: Patch según CHATGPT es lo más correcto, es la verdad???
-    @PatchMapping("cita/{citaId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void anularCita(@PathVariable("citaId") Long citaId) {
+    /**
+     * Endpoint: PUT /api/admin/citas/{citaId}
+     * Descripción: Anula una cita existente (estado = ANULADA).
+     */
+    @PutMapping("/citas/{citaId}")
+    public ResponseEntity<String> anularCita(@PathVariable("citaId") Long citaId) {
         citaService.anularCita(citaId);
+        return ResponseEntity.ok("Cita anulada exitosamente.");
     }
 
     /* GESTIÓN DE MEDICAMENTOS */

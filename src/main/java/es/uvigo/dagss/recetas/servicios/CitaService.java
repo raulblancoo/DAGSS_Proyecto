@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public interface CitaService {
-    List<Cita> listarCitas(LocalDate date, Long medicoId, Long pacienteId);
+    List<Cita> buscarCitasConParametros(LocalDate date, Long medicoId, Long pacienteId);
 
     List<Cita> listarCitasMedico(String numColegiado);
 
@@ -24,6 +24,5 @@ public interface CitaService {
     void anularCita(Long citaId);
     List<String> getDisponibilidadCitas(LocalDate fecha, String numSegSocial);
     void crearCita(CrearCitaRequest request, String numSegSocial);
-//    void confirmarCita(Long cita_id);
 }
 

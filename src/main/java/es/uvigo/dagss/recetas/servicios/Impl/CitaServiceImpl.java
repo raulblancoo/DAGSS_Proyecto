@@ -35,7 +35,7 @@ public class CitaServiceImpl implements CitaService {
 
 
     @Override
-    public List<Cita> listarCitas(LocalDate date, Long medicoId, Long pacienteId) {
+    public List<Cita> buscarCitasConParametros(LocalDate date, Long medicoId, Long pacienteId) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(23, 59, 59);
         Sort sort = Sort.by(Sort.Direction.ASC, "fechaHoraInicio");
@@ -189,22 +189,6 @@ public class CitaServiceImpl implements CitaService {
 
         citaRepository.save(cita);
     }
-
-//    @Transactional
-//    @Override
-//    public void confirmarCita(Long citaId) {
-//
-//        Paciente paciente = getCurrentPaciente();
-//        Cita cita = citaRepository.findByIdAndPaciente(cita_id, paciente)
-//                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada o no pertenece al paciente."));
-//
-//        if (cita.getEstado() != Cita.Estado.PLANIFICADA) {
-//            throw new IllegalArgumentException("Solo se pueden confirmar citas en estado PLANIFICADA.");
-//        }
-//
-//        cita.setEstado(Cita.Estado.COMPLETADA);
-//        citaRepository.save(cita);
-//    }
 
     public List<Cita> findByPacienteAndEstado(Paciente paciente, Cita.EstadoCita estado) {
         return citaRepository.findByPacienteAndEstado(paciente, estado);
