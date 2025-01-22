@@ -23,13 +23,13 @@ public class MedicamentoServiceImpl implements MedicamentoService {
         if(nombreComercial == null && principioActivo == null && fabricante == null && familia == null) {
             return medicamentoRepository.findAll();
         } else if(nombreComercial != null && principioActivo == null && fabricante == null && familia == null) {
-            return medicamentoRepository.findByNombreComercialLike(nombreComercial);
+            return medicamentoRepository.findByNombreComercialContaining(nombreComercial);
         } else if(nombreComercial == null && principioActivo != null && fabricante == null && familia == null) {
-            return medicamentoRepository.findByPrincipioActivoLike(principioActivo);
+            return medicamentoRepository.findByPrincipioActivoContaining(principioActivo);
         } else if(nombreComercial == null && principioActivo == null && fabricante != null && familia == null) {
-            return medicamentoRepository.findByFabricanteLike(fabricante);
+            return medicamentoRepository.findByFabricanteContaining(fabricante);
         } else if(nombreComercial == null && principioActivo == null && fabricante == null && familia != null) {
-            return medicamentoRepository.findByFamiliaLike(familia);
+            return medicamentoRepository.findByFamiliaContaining(familia);
         } else {
             throw new WrongParameterException("Solo se puede proporcionar un parámetro de filtro a la vez.");
         }

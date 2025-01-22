@@ -56,12 +56,12 @@ public class AdministradorServiceImpl implements AdministradorService {
         Administrador admin = administradorRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el administrador con id: " + adminId));
 
-        if(!administradorRepository.existsByEmail(request.getEmail())) {
+        if(administradorRepository.existsByEmail(request.getEmail())) {
             admin.setNombre(request.getNombre());
             admin.setEmail(request.getEmail());
             return administradorRepository.save(admin);
         } else {
-            throw new ResourceAlreadyExistsException("Ya existe un administrador con email: " + request.getEmail());
+            throw new ResourceNotFoundException("No existe un administrador con email: " + request.getEmail());
         }
     }
 
