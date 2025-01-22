@@ -1,10 +1,12 @@
 package es.uvigo.dagss.recetas.servicios.Impl;
 
+import es.uvigo.dagss.recetas.dtos.CrearMedicamentoRequest;
 import es.uvigo.dagss.recetas.entidades.Medicamento;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
 import es.uvigo.dagss.recetas.repositorios.MedicamentoRepository;
 import es.uvigo.dagss.recetas.servicios.MedicamentoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,37 +14,8 @@ import java.util.List;
 @Service
 public class MedicamentoServiceImpl implements MedicamentoService {
 
-    private final MedicamentoRepository medicamentoRepository;
-
-    public MedicamentoServiceImpl(MedicamentoRepository medicamentoRepository) {
-        this.medicamentoRepository = medicamentoRepository;
-    }
-
-    @Override
-    public List<Medicamento> listarMedicamentos() {
-        // TODO: comprobar si tienen que ser todos o solo los activos
-        return medicamentoRepository.findAll();
-    }
-
-    @Override
-    public List<Medicamento> buscarMedicamentosPorNombreComercial(String nombreComercial) {
-        return medicamentoRepository.findByNombreComercialLike(nombreComercial);
-    }
-
-    @Override
-    public List<Medicamento> buscarMedicamentosPorPrincipioActivo(String principioActivo) {
-        return medicamentoRepository.findByPrincipioActivoLike(principioActivo);
-    }
-
-    @Override
-    public List<Medicamento> buscarMedicamentosPorFabricante(String fabricante) {
-        return medicamentoRepository.findByFabricanteLike(fabricante);
-    }
-
-    @Override
-    public List<Medicamento> buscarMedicamentosPorFamilia(String familia) {
-        return medicamentoRepository.findByFamiliaLike(familia);
-    }
+    @Autowired
+    private MedicamentoRepository medicamentoRepository;
 
     @Override
     public List<Medicamento> buscarMedicamentoConFiltros(String nombreComercial, String principioActivo, String fabricante, String familia) {
@@ -64,17 +37,18 @@ public class MedicamentoServiceImpl implements MedicamentoService {
     }
 
     @Override
-    public Medicamento crearMedicamento(Medicamento medicamento) {
-
-        // TODO: no sé si hacer la validación de que ya existe por id
-
+    public Medicamento crearMedicamento(CrearMedicamentoRequest request) {
+        Medicamento medicamento = getMedicamentoFromRequest(new Medicamento(), request);
         return medicamentoRepository.save(medicamento);
     }
 
     @Override
-    public Medicamento editarMedicamento(Long id, Medicamento medicamento) {
-        //TODO
-        return null;
+    public Medicamento actualizarMedicamento(Long id, CrearMedicamentoRequest request) {
+        Medicamento medicamento = medicamentoRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Medicamento con id " + id + " no encontrado"));
+
+        Medicamento modifiedMedicamento = getMedicamentoFromRequest(medicamento, request);
+        return medicamentoRepository.save(modifiedMedicamento);
     }
 
     @Override
@@ -83,6 +57,15 @@ public class MedicamentoServiceImpl implements MedicamentoService {
                 orElseThrow(() -> new ResourceNotFoundException("No existe medicamento con el id: " + id));
         medicamentoExistente.setActivo(false);
         medicamentoRepository.save(medicamentoExistente);
+    }
+
+    private Medicamento getMedicamentoFromRequest(Medicamento medicamento, CrearMedicamentoRequest request) {
+        medicamento.setNombreComercial(medicamento.getNombreComercial());
+        medicamento.setPrincipioActivo(medicamento.getPrincipioActivo());
+        medicamento.setFabricante(medicamento.getFabricante());
+        medicamento.setFamilia(medicamento.getFamilia());
+        medicamento.setNumeroDosis(medicamento.getNumeroDosis());
+        return medicamento;
     }
 
     @Override

@@ -5,7 +5,6 @@ import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.*;
 import es.uvigo.dagss.recetas.mappers.*;
 import es.uvigo.dagss.recetas.servicios.*;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -105,7 +104,7 @@ public class AdministradorController {
      * Descripción: Cambia la contraseña de un administrador.
      */
     @PutMapping("/{adminId}/password")
-    public ResponseEntity<?> cambiarContrasenaAdministrador(
+    public ResponseEntity<String> cambiarContrasenaAdministrador(
             @PathVariable("adminId") Long adminId,
             @Validated @RequestBody ChangePasswordRequest request) {
         administradorService.cambiarPassword(request,adminId);
@@ -375,9 +374,14 @@ public class AdministradorController {
         return ResponseEntity.ok("Cita anulada exitosamente.");
     }
 
-    /* GESTIÓN DE MEDICAMENTOS */
 
-    @GetMapping("/medicamento")
+    /* GESTIÓN DE MEDICAMENTOS */
+    /**
+     * HU-A8: Gestión de medicamentos
+     * Endpoint: GET /api/admin/medicamentos
+     * Descripción: Obtiene la lista de medicamentos registrados con filtros opcionales.
+     */
+    @GetMapping("/medicamentos")
     public ResponseEntity<List<MedicamentoDto>> listarMedicamentos(
             @RequestParam(name = "nombreComercial", required = false) String nombreComercial,
             @RequestParam(name = "principioActivo", required = false) String principioActivo,
@@ -393,23 +397,37 @@ public class AdministradorController {
         return ResponseEntity.ok(medicamentoMapper.toListDto(listaMedicamentos));
     }
 
-    @PostMapping("/medicamento")
-    public ResponseEntity<Medicamento> crearMedicamento(@Valid @RequestBody Medicamento datosMedicamento) {
-        Medicamento medicamento = medicamentoService.crearMedicamento(datosMedicamento);
+    /**
+     * Endpoint: POST /api/admin/medicamentos
+     * Descripción: Crea un nuevo medicamento.
+     */
+    @PostMapping("/medicamentos")
+    public ResponseEntity<MedicamentoDto> crearMedicamento(@Validated @RequestBody CrearMedicamentoRequest request) {
+        Medicamento medicamento = medicamentoService.crearMedicamento(request);
         URI uri = crearURIMedicamento(medicamento);
-        return ResponseEntity.created(uri).body(medicamento);
+        return ResponseEntity.created(uri).body(medicamentoMapper.toDto(medicamento));
     }
 
-    @PutMapping("/medicamento/{medicamentoId}")
-    public ResponseEntity<MedicamentoDto> editarMedicamento(@PathVariable("medicamentoId") Long medicamentoId, @Valid @RequestBody Medicamento datosMedicamento) {
-        return null;
+    /**
+     * Endpoint: PUT /api/admin/medicamentos/{medicamentoId}
+     * Descripción: Actualiza los datos de un medicamento existente.
+     */
+    @PutMapping("/medicamentos/{medicamentoId}")
+    public ResponseEntity<MedicamentoDto> actualizarMedicamento(@PathVariable("medicamentoId") Long medicamentoId,
+            @Validated @RequestBody CrearMedicamentoRequest request) {
+        Medicamento medicamento = medicamentoService.actualizarMedicamento(medicamentoId, request);
+        return ResponseEntity.ok(medicamentoMapper.toDto(medicamento));
     }
 
-    @DeleteMapping("/medicamento/{medicamentoId}")
-    public void eliminarMedicamento(@PathVariable Long medicamentoId) {
+    /**
+     * Endpoint: DELETE /api/admin/medicamentos/{medicamentoId}
+     * Descripción: Elimina lógicamente un medicamento (activo = false).
+     */
+    @DeleteMapping("/medicamentos/{medicamentoId}")
+    public ResponseEntity<String> eliminarMedicamento(@PathVariable("medicamentoId") Long medicamentoId) {
         medicamentoService.eliminarMedicamento(medicamentoId);
+        return ResponseEntity.ok("Medicamento eliminado exitosamente.");
     }
-
 
     /* UTILS */
 
