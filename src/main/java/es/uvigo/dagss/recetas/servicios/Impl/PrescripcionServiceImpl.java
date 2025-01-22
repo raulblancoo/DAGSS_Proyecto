@@ -80,30 +80,34 @@ public class PrescripcionServiceImpl implements PrescripcionService {
 
     }
 
-    // TODO: Mirar como generamos los planes de receta
     @Transactional
     public void generarPlanRecetas(Prescripcion prescripcion) {
-        // Lógica para generar el plan de recetas
-        // Este método debe calcular las fechas de validez de las recetas y crearlas
-
-        // Ejemplo simplificado:
         LocalDate fechaInicio = prescripcion.getFechaInicio();
         LocalDate fechaFin = prescripcion.getFechaFin();
         Double dosisDiaria = prescripcion.getDosisDiaria();
         Integer numeroDosisEnvase = prescripcion.getMedicamento().getNumeroDosis();
 
-        // Cálculo simplificado: una receta por semana
+        int duracionDias = (int) Math.ceil(numeroDosisEnvase/dosisDiaria);
+
         LocalDate fechaActual = fechaInicio;
+        boolean isFirstReceta = true;
+
         while (!fechaActual.isAfter(fechaFin)) {
             Receta receta = new Receta();
+
+            if(isFirstReceta) {
+                receta.setFechaValidezInicial(fechaInicio);
+                isFirstReceta = false;
+            } else {
+                receta.setFechaValidezInicial(fechaActual.minusWeeks(1));
+            }
             receta.setPrescripcion(prescripcion);
-            receta.setFechaValidezInicial(fechaActual);
-            receta.setFechaValidezFinal(fechaActual.plusWeeks(1).minusDays(1));
-            receta.setNumeroUnidades(1); // Asumiendo una caja por receta
+            receta.setNumeroUnidades(1);
+            receta.setFechaValidezFinal(fechaActual.plusWeeks(1).plusDays(duracionDias));
             receta.setEstado(Receta.Estado.PLANIFICADA);
-            // Farmacia inicialmente nula
             recetaRepository.save(receta);
-            fechaActual = fechaActual.plusWeeks(1);
+
+            fechaActual = fechaActual.plusDays(duracionDias);
         }
     }
 }
