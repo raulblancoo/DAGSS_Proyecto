@@ -46,7 +46,7 @@ public class PacienteController {
     }
 
     /**
-     * Endpoint: GET /api/paciente/perfil
+     * Endpoint: GET /api/paciente/{numSegSocial}/perfil
      * Descripción: Devuelve la información personal del paciente.
      */
     @GetMapping("/perfil")
@@ -55,7 +55,7 @@ public class PacienteController {
     }
 
     /**
-     * Endpoint: PUT /api/paciente/perfil
+     * Endpoint: PUT /api/paciente/{numSegSocial}/perfil
      * Descripción: Permite modificar datos personales del paciente.
      */
     @PutMapping("/perfil")
@@ -67,10 +67,10 @@ public class PacienteController {
     }
 
     /**
-     * Endpoint: PUT /api/paciente/perfil/cambiar-contrasena
+     * Endpoint: PUT /api/paciente/perfil/password
      * Descripción: Permite al paciente actualizar su contraseña de acceso.
      */
-    @PutMapping("/perfil/cambiar-contrasena")
+    @PutMapping("/perfil/password")
     public ResponseEntity<String> changePasswordPaciente(
             @Validated @RequestBody ChangePasswordRequest request,
             @PathVariable("numSegSocial") String numSegSocial) {

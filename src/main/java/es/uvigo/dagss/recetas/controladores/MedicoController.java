@@ -97,10 +97,10 @@ public class MedicoController {
     }
 
     /**
-     * Endpoint: PUT /api/medico/{numColegiado}/perfil/cambiar-contrasena
+     * Endpoint: PUT /api/medico/{numColegiado}/perfil/password
      * Descripción: Permite al médico actualizar su contraseña de acceso.
      */
-    @PutMapping("/perfil/cambiar-contrasena")
+    @PutMapping("/perfil/password")
     public ResponseEntity<String> changePasswordMedico(
             @Validated @RequestBody ChangePasswordRequest request,
             @PathVariable("numColegiado") String numColegiado) {

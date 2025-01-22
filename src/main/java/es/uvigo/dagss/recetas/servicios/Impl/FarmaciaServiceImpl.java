@@ -4,10 +4,7 @@ import es.uvigo.dagss.recetas.dtos.*;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import es.uvigo.dagss.recetas.entidades.Farmacia;
 import es.uvigo.dagss.recetas.entidades.Receta;
-import es.uvigo.dagss.recetas.excepciones.RecetaNoServibleException;
-import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
-import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
-import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
+import es.uvigo.dagss.recetas.excepciones.*;
 import es.uvigo.dagss.recetas.repositorios.FarmaciaRepository;
 import es.uvigo.dagss.recetas.repositorios.RecetaRepository;
 import es.uvigo.dagss.recetas.servicios.FarmaciaService;
@@ -120,24 +117,23 @@ public class FarmaciaServiceImpl implements FarmaciaService {
     @Transactional
     @Override
     public void changePassword(ChangePasswordRequest request, String numeroColegiado) {
-        Farmacia farmacia = getCurrentFarmacia(numeroColegiado);
 
-        //TODO: método cambiar contraseña
-//        User user = medico.getUser();
-//
-//        // Verificar contraseña actual
-//        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getContraseña())) {
-//            throw new IllegalArgumentException("La contraseña actual es incorrecta.");
-//        }
-//
-//        // Verificar que la nueva contraseña y la confirmación coinciden
-//        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-//            throw new IllegalArgumentException("La nueva contraseña y su confirmación no coinciden.");
-//        }
-//
-//        // Encriptar y actualizar la contraseña
-//        user.setContraseña(passwordEncoder.encode(request.getNewPassword()));
-//        userRepository.save(user);
+        if(!farmaciaRepository.existsByNumeroColegiado(numeroColegiado)) {
+            throw new ResourceNotFoundException("No existe la farmacia con numero de colegiado: " + numeroColegiado);
+        } else {
+            Farmacia farmacia = getCurrentFarmacia(numeroColegiado);
+
+            if (farmacia.getPassword().equals(request.getCurrentPassword())) {
+                if (request.getNewPassword().equals(request.getConfirmNewPassword())) {
+                    farmacia.setPassword(request.getNewPassword());
+                    farmaciaRepository.save(farmacia);
+                } else {
+                    throw new PasswordProblemException("La nueva contraseña y su confirmación no coinciden");
+                }
+            } else {
+                throw new PasswordProblemException("La contraseña actual para el administrador no es correcta");
+            }
+        }
     }
 
     @Override
@@ -185,9 +181,7 @@ public class FarmaciaServiceImpl implements FarmaciaService {
 
     @Override
     public Farmacia findFarmaciaById(Long id) {
-        // TODO: comprobar el uso de Optional
-        Optional<Farmacia> farmacia = farmaciaRepository.findById(id);
-        return farmacia.orElseGet(Farmacia::new);
+        return farmaciaRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No existe farmacia con el id: "+ id));
     }
 
     private Farmacia getCurrentFarmacia(String numeroColegiado) {

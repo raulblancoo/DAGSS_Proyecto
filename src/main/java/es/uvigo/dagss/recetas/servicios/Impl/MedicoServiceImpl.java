@@ -7,6 +7,7 @@ import es.uvigo.dagss.recetas.dtos.UpdateMedicoProfileRequest;
 import es.uvigo.dagss.recetas.entidades.CentroSalud;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import es.uvigo.dagss.recetas.entidades.Medico;
+import es.uvigo.dagss.recetas.excepciones.PasswordProblemException;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
@@ -129,24 +130,23 @@ public class MedicoServiceImpl implements MedicoService {
     @Override
     @Transactional
     public void changePassword(ChangePasswordRequest request, String numColegiado) {
-        Medico medico = getCurrentMedico(numColegiado);
+        if(!medicoRepository.existsByNumeroColegiado(numColegiado)) {
+            throw new ResourceNotFoundException("No existe el medico con el número de colegiado: " + numColegiado);
+        } else {
+            Medico medico = getCurrentMedico(numColegiado);
 
-        //TODO: método cambiar contraseña
-//        User user = medico.getUser();
-//
-//        // Verificar contraseña actual
-//        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getContraseña())) {
-//            throw new IllegalArgumentException("La contraseña actual es incorrecta.");
-//        }
-//
-//        // Verificar que la nueva contraseña y la confirmación coinciden
-//        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-//            throw new IllegalArgumentException("La nueva contraseña y su confirmación no coinciden.");
-//        }
-//
-//        // Encriptar y actualizar la contraseña
-//        user.setContraseña(passwordEncoder.encode(request.getNewPassword()));
-//        userRepository.save(user);
+            if(medico.getPassword().equals(request.getCurrentPassword())) {
+                if(request.getNewPassword().equals(request.getConfirmNewPassword())){
+                    medico.setPassword(request.getNewPassword());
+                    medicoRepository.save(medico);
+                }
+                else {
+                    throw new PasswordProblemException("La nueva contraseña y su confirmación no coinciden");
+                }
+            } else {
+                throw new PasswordProblemException("La nueva contraseña y su confirmación no coinciden");
+            }
+        }
     }
 
     @Override
@@ -170,7 +170,6 @@ public class MedicoServiceImpl implements MedicoService {
         return findMedicoById(medicoId).getCentroSalud().getId().equals(centroId);
     }
 
-    // TODO: validaciones de existencia de médico
     private Medico getCurrentMedico(String numColegiado) {
         return medicoRepository.findByNumeroColegiado(numColegiado);
     }

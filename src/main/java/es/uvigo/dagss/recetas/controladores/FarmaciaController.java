@@ -60,10 +60,10 @@ public class FarmaciaController {
     }
 
     /**
-     * Endpoint: PUT /api/farmacia/{numColegiado}/perfil/cambiar-contrasena
+     * Endpoint: PUT /api/farmacia/{numColegiado}/perfil/password
      * Descripción: Permite a la farmacia actualizar su contraseña de acceso.
      */
-    @PutMapping("/perfil/cambiar-contrasena")
+    @PutMapping("/perfil/password")
     public ResponseEntity<?> changePasswordFarmacia(
             @PathVariable("numColegiado") String numColegiado,
             @Validated @RequestBody ChangePasswordRequest request) {

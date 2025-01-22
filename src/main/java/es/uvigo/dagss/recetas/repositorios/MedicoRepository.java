@@ -8,6 +8,7 @@ import java.util.List;
 public interface MedicoRepository extends JpaRepository<Medico, Long> {
     Medico findByNumeroColegiado(String numeroColegiado);
     boolean existsByDniOrNumeroColegiado(String dni, String numeroColegiado);
+    boolean existsByNumeroColegiado(String numeroColegiado);
 
     List<Medico> findByDireccion_LocalidadContaining(String direccion);
     List<Medico> findByNombreContaining(String nombre);

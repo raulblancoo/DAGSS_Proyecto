@@ -6,6 +6,7 @@ import es.uvigo.dagss.recetas.dtos.DireccionDto;
 import es.uvigo.dagss.recetas.dtos.UpdatePacienteProfileRequest;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import es.uvigo.dagss.recetas.entidades.Paciente;
+import es.uvigo.dagss.recetas.excepciones.PasswordProblemException;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.excepciones.WrongParameterException;
@@ -148,24 +149,23 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Override
     public void changePassword(ChangePasswordRequest request, String numSegSocial) {
-        Paciente paciente = getCurrentPaciente(numSegSocial);
+        if(!pacienteRepository.existsByNumeroSeguridadSocial(numSegSocial)) {
+            throw new ResourceNotFoundException("No existe el paciente con el numero de seguridad social: " + numSegSocial);
+        } else {
+            Paciente paciente = getCurrentPaciente(numSegSocial);
 
-        //TODO: método cambiar contraseña
-//        User user = medico.getUser();
-//
-//        // Verificar contraseña actual
-//        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getContraseña())) {
-//            throw new IllegalArgumentException("La contraseña actual es incorrecta.");
-//        }
-//
-//        // Verificar que la nueva contraseña y la confirmación coinciden
-//        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-//            throw new IllegalArgumentException("La nueva contraseña y su confirmación no coinciden.");
-//        }
-//
-//        // Encriptar y actualizar la contraseña
-//        user.setContraseña(passwordEncoder.encode(request.getNewPassword()));
-//        userRepository.save(user);
+            if(paciente.getPassword().equals(request.getCurrentPassword())) {
+                if(request.getNewPassword().equals(request.getConfirmNewPassword())){
+                    paciente.setPassword(request.getNewPassword());
+                    pacienteRepository.save(paciente);
+                } else {
+                    throw new PasswordProblemException("La nueva contraseña y su confirmación no coinciden");
+                }
+            } else {
+                throw new PasswordProblemException("La contraseña actual para el administrador no es correcta");
+
+            }
+        }
     }
 
     @Override
