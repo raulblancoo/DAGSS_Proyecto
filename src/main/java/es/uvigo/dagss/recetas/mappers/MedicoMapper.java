@@ -12,10 +12,10 @@ import java.util.List;
 
 @Mapper(componentModel="spring")
 public interface MedicoMapper {
-    //@Mapping(source = "centroSalud", target = "centroSalud", qualifiedByName = "concatCentroSalud")
+    @Mapping(source = "direccion.localidad", target = "localidad")
+    @Mapping(source = "direccion.provincia", target = "provincia")
+    @Mapping(source = "centroSalud", target = "centro" , qualifiedByName = "concatCentroSalud")
     MedicoDto toDto(Medico medico);
-
-    Medico toEntity(MedicoDto medicoDto);
     List<MedicoDto> toListDto(List<Medico> medicos);
 
 
@@ -24,7 +24,10 @@ public interface MedicoMapper {
 
     @Named("concatCentroSalud")
     default String concatCentroSalud(CentroSalud centroSalud) {
-        return centroSalud.getNombre() + ", " + centroSalud.getDireccion().getLocalidad();
+        if (centroSalud == null) {
+            return null;
+        }
+        return centroSalud.getNombre() + " (" +  centroSalud.getDireccion().toString() + ")";
     }
 
 }

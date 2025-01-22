@@ -34,7 +34,7 @@ public class RecetaServiceImpl implements RecetaService {
     @Override
     public List<Receta> buscarRecetasPendientes(String numSegSocial) {
         Paciente paciente = pacienteService.findPacienteByNumSeguridadSocial(numSegSocial);
-        return recetaRepository.findByPrescripcion_Paciente(paciente);
+        return recetaRepository.findByPrescripcion_PacienteAndEstado(paciente, Receta.Estado.PLANIFICADA);
     }
 
     @Transactional

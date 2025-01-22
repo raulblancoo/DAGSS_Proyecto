@@ -3,6 +3,7 @@ package es.uvigo.dagss.recetas.dtos;
 import es.uvigo.dagss.recetas.entidades.Direccion;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -47,9 +48,9 @@ public class CrearPacienteRequest {
 
     private Date fechaNacimiento;
 
-    @NotBlank(message = "El centro de salud asignado es obligatorio.")
+    @NotNull(message = "El centro de salud asignado es obligatorio.")
     private Long centroSaludId;
 
-    @NotBlank(message = "El médico asignado es obligatorio.")
+    @NotNull(message = "El médico asignado es obligatorio.")
     private Long medicoAsignadoId;
 }
