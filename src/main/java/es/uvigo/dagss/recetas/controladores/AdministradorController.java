@@ -24,6 +24,8 @@ public class AdministradorController {
     @Autowired
     private AdministradorService administradorService;
     @Autowired
+    private AdministradorMapper administradorMapper;
+    @Autowired
     private CentroSaludService centroSaludService;
     @Autowired
     private CentroSaludMapper centroSaludMapper;
@@ -60,19 +62,18 @@ public class AdministradorController {
         return ResponseEntity.ok(administradorService.getHomeOptions());
     }
 
-    // TODO: cambiar el return por un Dto
     /**
      * HU-A2: Gestión de administradores
      * Endpoint: GET /api/admin
      * Descripción: Obtiene la lista de administradores registrados.
      */
     @GetMapping
-    public ResponseEntity<List<Administrador>> listarAdministradores() {
+    public ResponseEntity<List<AdministradorDto>> listarAdministradores() {
         List<Administrador> administradores = administradorService.buscarTodos();
         if (administradores.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.ok(administradores);
+            return ResponseEntity.ok(administradorMapper.toListDto(administradores));
         }
     }
 
@@ -124,6 +125,11 @@ public class AdministradorController {
 
     /* GESTIÓN DE CENTROS DE SALUD */
 
+    /**
+     * HU-A3: Gestión de centros de salud
+     * Endpoint: GET /api/admin/centroSalud
+     * Descripción: Obtiene la lista de centros de salud registrados con filtros opcionales.
+     */
     @GetMapping("/centroSalud")
     public ResponseEntity<List<CentroSaludDto>> listarCentrosSalud(
             @RequestParam(name = "nombre", required = false) String nombre,
@@ -138,23 +144,37 @@ public class AdministradorController {
         return ResponseEntity.ok(centroSaludMapper.toListDto(listaCentros));
     }
 
+    /**
+     * Endpoint: POST /api/admin/centroSalud
+     * Descripción: Crea un nuevo centro de salud.
+     */
     @PostMapping("/centroSalud")
-    public ResponseEntity<CentroSalud> crearCentro(@Valid @RequestBody CentroSalud datosCentroSalud) {
-        CentroSalud centroSalud = centroSaludService.crearCentro(datosCentroSalud);
+    public ResponseEntity<CentroSaludDto> crearCentro(@Validated @RequestBody CrearCentroSaludRequest request) {
+        CentroSalud centroSalud = centroSaludService.crearCentro(request);
         URI uri = crearURICentroSalud(centroSalud);
-        return ResponseEntity.created(uri).body(centroSalud);
+        return ResponseEntity.created(uri).body(centroSaludMapper.toDto(centroSalud));
     }
 
-    // TODO: debe devolver un 200
-    @PutMapping("/centroSalud/{centroSaludId}")
-    public ResponseEntity<CentroSalud> editarCentro(@PathVariable("centroSaludId") Long centroSaludId, @RequestBody CentroSalud datos) {
-        return ResponseEntity.ok(centroSaludService.editarCentro(centroSaludId, datos));
+    /**
+     * Endpoint: PUT /api/admin/centroSalud/{centroId}
+     * Descripción: Actualiza los datos de un centro de salud existente.
+     */
+    @PutMapping("/centroSalud/{centroId}")
+    public ResponseEntity<CentroSaludDto> actualizarCentroSalud(
+            @PathVariable("centroId") Long centroId,
+            @Validated @RequestBody CrearCentroSaludRequest request) {
+        CentroSalud centro = centroSaludService.actualizarCentro(centroId, request);
+        return ResponseEntity.ok(centroSaludMapper.toDto(centro));
     }
 
-    // TODO: ResponseEntity
-    @DeleteMapping("/centroSalud/{centroSaludId}")
-    public void eliminarCentro(@PathVariable("centroSaludId") Long centroSaludId) {
-        centroSaludService.desactivarCentro(centroSaludId);
+    /**
+     * Endpoint: DELETE /api/admin/centroSalud/{centroId}
+     * Descripción: Elimina lógicamente un centro de salud (activo = false).
+     */
+    @DeleteMapping("/centroSalud/{centroId}")
+    public ResponseEntity<String> eliminarCentroSalud(@PathVariable("centroId") Long centroId,) {
+        centroSaludService.eliminarCentro(centroId);
+        return ResponseEntity.ok("Centro de salud eliminado exitosamente.");
     }
 
     /* GESTIÓN DE MÉDICOS */
