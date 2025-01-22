@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -49,6 +50,22 @@ public class AdministradorController {
 
     /* GESTIÓN DE ADMINISTRADORES */
 
+    /**
+     * HU-A1: Home de administradores
+     * Endpoint: GET /api/admin/home
+     * Descripción: Devuelve las opciones disponibles en el menú para el administrador.
+     */
+    @GetMapping("/home")
+    public ResponseEntity<List<String>> getAdministradorHome() {
+        return ResponseEntity.ok(administradorService.getHomeOptions());
+    }
+
+    // TODO: cambiar el return por un Dto
+    /**
+     * HU-A2: Gestión de administradores
+     * Endpoint: GET /api/admin
+     * Descripción: Obtiene la lista de administradores registrados.
+     */
     @GetMapping
     public ResponseEntity<List<Administrador>> listarAdministradores() {
         List<Administrador> administradores = administradorService.buscarTodos();
@@ -59,32 +76,51 @@ public class AdministradorController {
         }
     }
 
+    /**
+     * Endpoint: POST /api/admin
+     * Descripción: Crea un nuevo administrador.
+     */
     @PostMapping
-    public ResponseEntity<Administrador> crearAdministrador(@Valid @RequestBody Administrador administrador) {
-        try {
-            administradorService.crearAdministrador(
-                    administrador.getLogin(), administrador.getPassword(),
-                    administrador.getNombre(), administrador.getEmail());
-            return ResponseEntity.ok(administrador);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<String> crearAdministrador(
+            @Validated @RequestBody CrearAdminRequest request) {
+        administradorService.crearAdministrador(request);
+        return new ResponseEntity<>("Administrador creado exitosamente.", HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Administrador> editarAdministrador(@PathVariable Long id, @RequestBody Administrador datos) {
-        try {
-            administradorService.editarAdministrador(id, datos.getNombre(), datos.getEmail(), datos.getActivo());
-            return ResponseEntity.ok(datos);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+    /**
+     * Endpoint: PUT /api/admin/{adminId}
+     * Descripción: Actualiza los datos de un administrador existente.
+     */
+    @PutMapping("/{adminId}")
+    public ResponseEntity<String> actualizarAdministrador(
+            @PathVariable("adminId") Long adminId,
+            @Validated @RequestBody UpdateAdminRequest request) {
+        administradorService.actualizarAdministrador(request, adminId);
+        return ResponseEntity.ok("Administrador actualizado exitosamente.");
     }
 
-    @DeleteMapping("{id}")
-    public void eliminarAdministrador(@PathVariable Long id) {
-        administradorService.desactivarAdministrador(id);
+    /**
+     * Endpoint: PUT /api/admin/{adminId}/password
+     * Descripción: Cambia la contraseña de un administrador.
+     */
+    @PutMapping("/{adminId}/password")
+    public ResponseEntity<?> cambiarContrasenaAdministrador(
+            @PathVariable("adminId") Long adminId,
+            @Validated @RequestBody ChangePasswordRequest request) {
+        administradorService.cambiarPassword(request,adminId);
+        return ResponseEntity.ok("Contraseña cambiada exitosamente.");
     }
+
+    /**
+     * Endpoint: DELETE /api/admin/{adminId}
+     * Descripción: Elimina lógicamente un administrador (activa = false).
+     */
+    @DeleteMapping("/{adminId}")
+    public ResponseEntity<String> eliminarAdministrador(@PathVariable("adminId") Long adminId) {
+        administradorService.eliminarAdministrador(adminId);
+        return ResponseEntity.ok("Administrador eliminado exitosamente.");
+    }
+
 
     /* GESTIÓN DE CENTROS DE SALUD */
 
@@ -296,6 +332,10 @@ public class AdministradorController {
 
 
     /* UTILS */
+
+    private URI crearURIAdministrador(Administrador administrador) {
+        return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(administrador.getId()).toUri();
+    }
 
     private URI crearURICentroSalud(CentroSalud centroSalud) {
         return ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(centroSalud.getId()).toUri();

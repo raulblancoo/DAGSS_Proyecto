@@ -83,8 +83,6 @@ public class GlobalExceptionHandler {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problemDetail.setTitle("Unexpected Exception");
         problemDetail.setDetail("An unexpected error occurred.");
-        // Opcional: No exponer ex.getMessage() en producción por razones de seguridad
-        // problemDetail.setDetail(ex.getMessage());
         return problemDetail;
     }
 
@@ -96,6 +94,18 @@ public class GlobalExceptionHandler {
 
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("Receta No Servible");
+        problemDetail.setDetail(ex.getMessage());
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PasswordProblemException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProblemDetail handlePasswordProblemException(
+            PasswordProblemException ex, WebRequest request) {
+
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle("Password Problem");
         problemDetail.setDetail(ex.getMessage());
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
