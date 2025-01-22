@@ -8,7 +8,6 @@ import es.uvigo.dagss.recetas.excepciones.PasswordProblemException;
 import es.uvigo.dagss.recetas.excepciones.ResourceAlreadyExistsException;
 import es.uvigo.dagss.recetas.excepciones.ResourceNotFoundException;
 import es.uvigo.dagss.recetas.repositorios.AdministradorRepository;
-import es.uvigo.dagss.recetas.repositorios.UsuarioRepository;
 import es.uvigo.dagss.recetas.servicios.AdministradorService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,6 @@ import java.util.List;
 
 @Service
 public class AdministradorServiceImpl implements AdministradorService {
-
-    @Autowired
-    private UsuarioRepository usuarioRepository;
     @Autowired
     private AdministradorRepository administradorRepository;
 
@@ -45,25 +41,25 @@ public class AdministradorServiceImpl implements AdministradorService {
 
     @Transactional
     @Override
-    public void crearAdministrador(CrearAdminRequest request) {
+    public Administrador crearAdministrador(CrearAdminRequest request) {
         if(administradorRepository.existsByEmail(request.getEmail())) {
             throw new ResourceAlreadyExistsException("El administrador con email " + request.getEmail() + "ya existe");
         }
 
         Administrador administrador = new Administrador(request.getLogin(), request.getPassword(), request.getNombre(), request.getEmail());
-        administradorRepository.save(administrador);
+        return administradorRepository.save(administrador);
     }
 
     @Transactional
     @Override
-    public void actualizarAdministrador(UpdateAdminRequest request, Long adminId) {
+    public Administrador actualizarAdministrador(UpdateAdminRequest request, Long adminId) {
         Administrador admin = administradorRepository.findById(adminId)
                 .orElseThrow(() -> new ResourceNotFoundException("No existe el administrador con id: " + adminId));
 
         if(!administradorRepository.existsByEmail(request.getEmail())) {
             admin.setNombre(request.getNombre());
             admin.setEmail(request.getEmail());
-            administradorRepository.save(admin);
+            return administradorRepository.save(admin);
         } else {
             throw new ResourceAlreadyExistsException("Ya existe un administrador con email: " + request.getEmail());
         }

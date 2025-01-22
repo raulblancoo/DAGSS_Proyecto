@@ -7,7 +7,6 @@ import es.uvigo.dagss.recetas.mappers.*;
 import es.uvigo.dagss.recetas.servicios.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -81,10 +80,11 @@ public class AdministradorController {
      * Descripción: Crea un nuevo administrador.
      */
     @PostMapping
-    public ResponseEntity<String> crearAdministrador(
+    public ResponseEntity<AdministradorDto> crearAdministrador(
             @Validated @RequestBody CrearAdminRequest request) {
-        administradorService.crearAdministrador(request);
-        return new ResponseEntity<>("Administrador creado exitosamente.", HttpStatus.CREATED);
+        Administrador admin = administradorService.crearAdministrador(request);
+        URI uri = crearURIAdministrador(admin);
+        return ResponseEntity.created(uri).body(administradorMapper.toDto(admin));
     }
 
     /**
@@ -92,11 +92,11 @@ public class AdministradorController {
      * Descripción: Actualiza los datos de un administrador existente.
      */
     @PutMapping("/{adminId}")
-    public ResponseEntity<String> actualizarAdministrador(
+    public ResponseEntity<AdministradorDto> actualizarAdministrador(
             @PathVariable("adminId") Long adminId,
             @Validated @RequestBody UpdateAdminRequest request) {
-        administradorService.actualizarAdministrador(request, adminId);
-        return ResponseEntity.ok("Administrador actualizado exitosamente.");
+        Administrador administrador = administradorService.actualizarAdministrador(request, adminId);
+        return ResponseEntity.ok(administradorMapper.toDto(administrador));
     }
 
     /**

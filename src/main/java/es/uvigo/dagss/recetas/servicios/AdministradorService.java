@@ -12,8 +12,8 @@ import java.util.List;
 public interface AdministradorService {
     List<String> getHomeOptions();
     List<Administrador> buscarTodos();
-    void crearAdministrador(CrearAdminRequest request);
-    void actualizarAdministrador(UpdateAdminRequest request, Long adminId);
+    Administrador crearAdministrador(CrearAdminRequest request);
+    Administrador actualizarAdministrador(UpdateAdminRequest request, Long adminId);
     void cambiarPassword(ChangePasswordRequest request, Long adminId);
     void eliminarAdministrador(Long id);
 }
